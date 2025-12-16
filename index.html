@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Imóveis Fernanda Freitas - Marca D'Água</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- JSZip -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #f5f6f8;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --accent: #2563eb;
+        --radius: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Roboto;
+      }
+
+      body {
+        margin: 0;
+        padding: 32px;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+
+      p {
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      label {
+        font-size: 0.85rem;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      input[type='file'],
+      input[type='range'] {
+        width: 100%;
+      }
+
+      input[type='range'] {
+        accent-color: var(--accent);
+      }
+
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+      }
+
+      .preview img {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      footer {
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Imóveis Fernanda Freitas - Marca D'Água</h1>
+      <p>
+        Faça upload de imagens, aplique uma marca d'água de logotipo
+        centralizado e baixe tudo como um ZIP.
+      </p>
+
+      <div class="card">
+        <div class="controls">
+          <div>
+            <label>Enviar imagens (escolha multiplas imgs)</label>
+            <input type="file" id="imagesInput" multiple accept="image/*" />
+          </div>
+
+          <div>
+            <label>Enviar Logo</label>
+            <input type="file" id="logoInput" accept="image/*" />
+          </div>
+
+          <div>
+            <label>Opacidade: <span id="opacityValue">0.30</span></label>
+            <input
+              type="range"
+              id="opacity"
+              min="0.05"
+              max="1"
+              step="0.05"
+              value="0.3"
+            />
+          </div>
+
+          <div>
+            <label>Tamanho Marca D'Água: <span id="sizeValue">30%</span></label>
+            <input
+              type="range"
+              id="size"
+              min="10"
+              max="80"
+              step="5"
+              value="30"
+            />
+          </div>
+
+          <div style="align-self: end">
+            <button id="downloadBtn" disabled>Download ZIP</button>
+          </div>
+        </div>
+
+        <div class="preview" id="preview"></div>
+      </div>
+
+      <!-- <footer>Simple Watermark Tool · Offline-ready · No backend</footer> -->
+    </div>
+
+    <script>
+      const imagesInput = document.getElementById('imagesInput');
+      const logoInput = document.getElementById('logoInput');
+      const opacityInput = document.getElementById('opacity');
+      const sizeInput = document.getElementById('size');
+      const opacityValue = document.getElementById('opacityValue');
+      const sizeValue = document.getElementById('sizeValue');
+      const preview = document.getElementById('preview');
+      const downloadBtn = document.getElementById('downloadBtn');
+
+      let images = [];
+      let logo = null;
+      let processed = [];
+
+      opacityInput.addEventListener('input', updateAndProcess);
+      sizeInput.addEventListener('input', updateAndProcess);
+
+      imagesInput.addEventListener('change', (e) => {
+        images = Array.from(e.target.files);
+        if (logo) processImages();
+      });
+
+      logoInput.addEventListener('change', (e) => {
+        logo = e.target.files[0];
+        if (images.length) processImages();
+      });
+
+      function updateAndProcess() {
+        opacityValue.textContent = opacityInput.value;
+        sizeValue.textContent = sizeInput.value + '%';
+        if (images.length && logo) processImages();
+      }
+
+      function processImages() {
+        preview.innerHTML = '';
+        processed = [];
+        downloadBtn.disabled = true;
+
+        const logoImg = new Image();
+        logoImg.src = URL.createObjectURL(logo);
+
+        logoImg.onload = async () => {
+          for (const file of images) {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+
+            await new Promise((resolve) => {
+              img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.drawImage(img, 0, 0);
+
+                const sizeRatio = sizeInput.value / 100;
+                const maxWidth = canvas.width * sizeRatio;
+                const scale = maxWidth / logoImg.width;
+
+                const w = logoImg.width * scale;
+                const h = logoImg.height * scale;
+
+                ctx.globalAlpha = parseFloat(opacityInput.value);
+                ctx.drawImage(
+                  logoImg,
+                  (canvas.width - w) / 2,
+                  (canvas.height - h) / 2,
+                  w,
+                  h
+                );
+
+                canvas.toBlob(
+                  (blob) => {
+                    processed.push({ name: file.name, blob });
+                    const previewImg = document.createElement('img');
+                    previewImg.src = URL.createObjectURL(blob);
+                    preview.appendChild(previewImg);
+                    resolve();
+                  },
+                  'image/jpeg',
+                  0.95
+                );
+              };
+            });
+          }
+
+          downloadBtn.disabled = false;
+        };
+      }
+
+      downloadBtn.addEventListener('click', async () => {
+        downloadBtn.disabled = true;
+
+        const zip = new JSZip();
+        processed.forEach((file) => {
+          zip.file(file.name, file.blob);
+        });
+
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(content);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'watermarked-images.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        downloadBtn.disabled = false;
+      });
+    </script>
+  </body>
+</html>
