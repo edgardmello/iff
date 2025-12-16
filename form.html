@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cadastro de Imóvel - Formulário do Proprietário</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/vanilla-masker@1.1.1/build/vanilla-masker.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-header">
+        <h1>
+          <i
+            id="toggleRequiredIcon"
+            class="fa-solid fa-clipboard cursor-pointer"
+            title="Alternar obrigatoriedade"
+          ></i>
+          Cadastro de Imóvel
+        </h1>
+        <p>Preencha os dados do imóvel para gerar um arquivo JSON</p>
+      </div>
+      <div class="form-card">
+        <div class="progress-steps" aria-hidden="false">
+          <div class="progress-track" aria-hidden="true">
+            <div
+              class="progress-fill"
+              id="progressFill"
+              style="width: 0%"
+            ></div>
+          </div>
+
+          <div class="progress-summary" id="progressSummary">
+            Etapa <strong>1</strong> de 9
+          </div>
+
+          <div class="sr-only" aria-hidden="true"></div>
+        </div>
+
+        <div class="alert-container" id="alertContainer"></div>
+        <form id="propertyForm" onsubmit="return false;">
+          <div class="step-content active" data-step="1">
+            <div class="section-title">
+              <span class="emoji">👤</span> Dados do Proprietário
+            </div>
+            <div class="form-group">
+              <label for="nome" class="required">Nome Completo</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="nome"
+                  name="nome"
+                  placeholder="Digite seu nome completo"
+                  required
+                  onchange="updateState('proprietario', 'nome', this.value)"
+                />
+                <span class="success-icon">✓</span>
+              </div>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="celular" class="required">Celular</label>
+                <div class="input-wrapper">
+                  <input
+                    type="tel"
+                    id="celular"
+                    name="celular"
+                    placeholder="(99) 99999-9999"
+                    required
+                    onchange="updateState('proprietario', 'celular', this.value)"
+                  />
+                  <span class="success-icon">✓</span>
+                </div>
+                <span class="error-message"></span>
+              </div>
+              <div class="form-group">
+                <label for="email" class="required">Email</label>
+                <div class="input-wrapper">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="seu@email.com"
+                    required
+                    onchange="updateState('proprietario', 'email', this.value)"
+                  />
+                  <span class="success-icon">✓</span>
+                </div>
+                <span class="error-message"></span>
+              </div>
+            </div>
+          </div>
+          <div class="step-content" data-step="2">
+            <div class="section-title">
+              <span class="emoji">📍</span> Localização e Entorno
+            </div>
+            <div class="form-group">
+              <label for="cep" class="required">CEP</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="cep"
+                  name="cep"
+                  placeholder="00000-000"
+                  required
+                  onblur="autoCompleteCep()"
+                  onchange="updateState('localizacao', 'cep', this.value)"
+                />
+                <span class="success-icon">✓</span>
+              </div>
+              <span class="error-message"></span>
+              <span class="field-hint"
+                >Digite o CEP para auto-completar o endereço.</span
+              >
+            </div>
+            <div class="form-group">
+              <label for="endereco" class="required">Endereço</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="endereco"
+                  name="endereco"
+                  placeholder="Rua, Avenida, etc."
+                  required
+                  onchange="updateState('localizacao', 'endereco', this.value)"
+                />
+                <span class="success-icon">✓</span>
+              </div>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="numero" class="required">Número</label>
+                <div class="input-wrapper">
+                  <input
+                    type="text"
+                    id="numero"
+                    name="numero"
+                    placeholder="123"
+                    required
+                    onchange="updateState('localizacao', 'numero', this.value)"
+                  />
+                  <span class="success-icon">✓</span>
+                </div>
+                <span class="error-message"></span>
+              </div>
+              <div class="form-group">
+                <label for="complemento">Complemento</label>
+                <input
+                  type="text"
+                  id="complemento"
+                  name="complemento"
+                  placeholder="Apto 101, Bloco A"
+                  onchange="updateState('localizacao', 'complemento', this.value)"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="bairro" class="required">Bairro</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="bairro"
+                  name="bairro"
+                  placeholder="Nome do bairro"
+                  required
+                  onchange="updateState('localizacao', 'bairro', this.value)"
+                />
+                <span class="success-icon">✓</span>
+              </div>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cidade" class="required">Cidade</label>
+                <div class="input-wrapper">
+                  <input
+                    type="text"
+                    id="cidade"
+                    name="cidade"
+                    placeholder="São Paulo"
+                    required
+                    onchange="updateState('localizacao', 'cidade', this.value)"
+                  />
+                  <span class="success-icon">✓</span>
+                </div>
+                <span class="error-message"></span>
+              </div>
+              <div class="form-group">
+                <label for="uf" class="required">UF</label>
+                <select
+                  id="uf"
+                  name="uf"
+                  required
+                  onchange="updateState('localizacao', 'uf', this.value)"
+                >
+                  <option value="">Selecione</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value__ "MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Padrão da Localização</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="loc_privilegiada"
+                    name="padrao_localizacao"
+                    value="Privilegiada"
+                    onchange="updateRadioState('localizacao', 'padrao_localizacao', this.value)"
+                  /><label for="loc_privilegiada">Privilegiada</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="loc_otima"
+                    name="padrao_localizacao"
+                    value="Ótima"
+                    onchange="updateRadioState('localizacao', 'padrao_localizacao', this.value)"
+                  /><label for="loc_otima">Ótima</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="loc_media"
+                    name="padrao_localizacao"
+                    value="Média"
+                    onchange="updateRadioState('localizacao', 'padrao_localizacao', this.value)"
+                  /><label for="loc_media">Média</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="loc_boa"
+                    name="padrao_localizacao"
+                    value="Boa"
+                    onchange="updateRadioState('localizacao', 'padrao_localizacao', this.value)"
+                  /><label for="loc_boa">Boa</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="loc_regular"
+                    name="padrao_localizacao"
+                    value="Regular"
+                    onchange="updateRadioState('localizacao', 'padrao_localizacao', this.value)"
+                  /><label for="loc_regular">Regular</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ponto_referencia">Ponto de Referência</label>
+              <input
+                type="text"
+                id="ponto_referencia"
+                name="ponto_referencia"
+                placeholder="Ex: Próximo ao Shopping, Metrô..."
+                onchange="updateState('localizacao', 'ponto_referencia', this.value)"
+              />
+            </div>
+          </div>
+          <div class="step-content" data-step="3">
+            <div class="section-title">
+              <span class="emoji">🏠</span> Detalhes Principais do Imóvel
+            </div>
+            <div class="form-group">
+              <label for="cod_iptu">Cód IPTU</label>
+              <input
+                type="text"
+                id="cod_iptu"
+                name="cod_iptu"
+                placeholder="Digite o código do IPTU"
+                onchange="updateState('detalhes', 'cod_iptu', this.value)"
+              />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="finalidade" class="required">Finalidade</label>
+                <select
+                  id="finalidade"
+                  name="finalidade"
+                  required
+                  onchange="updateState('detalhes', 'finalidade', this.value)"
+                >
+                  <option value="">Selecione a Finalidade</option>
+                  <option value="Venda">Venda</option>
+                  <option value="Aluguel">Aluguel</option>
+                  <option value="Temporada">Temporada</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="tipo_imóvel" class="required">Tipo do imóvel</label>
+                <select
+                  id="tipo_imóvel"
+                  name="tipo_imóvel"
+                  required
+                  onchange="updateState('detalhes', 'tipo_imóvel', this.value)"
+                >
+                  <option value="">Selecione o Tipo</option>
+                  <option value="Apartamento">Apartamento</option>
+                  <option value="Casa">Casa</option>
+                  <option value="Sobrado">Sobrado</option>
+                  <option value="Cobertura">Cobertura</option>
+                  <option value="Sala Comercial">Sala Comercial</option>
+                  <option value="Loja">Loja</option>
+                  <option value="Galpão">Galpão</option>
+                  <option value="Terreno">Terreno</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Padrão</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="padrao_alto"
+                    name="padrao_imóvel"
+                    value="Alto"
+                    onchange="updateRadioState('detalhes', 'padrao_imóvel', this.value)"
+                  />
+                  <label for="padrao_alto">Alto</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="padrao_medio"
+                    name="padrao_imóvel"
+                    value="Médio"
+                    onchange="updateRadioState('detalhes', 'padrao_imóvel', this.value)"
+                  />
+                  <label for="padrao_medio">Médio</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="padrao_regular"
+                    name="padrao_imóvel"
+                    value="Regular"
+                    onchange="updateRadioState('detalhes', 'padrao_imóvel', this.value)"
+                  />
+                  <label for="padrao_regular">Regular</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="padrao_baixo"
+                    name="padrao_imóvel"
+                    value="Baixo"
+                    onchange="updateRadioState('detalhes', 'padrao_imóvel', this.value)"
+                  />
+                  <label for="padrao_baixo">Baixo</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tipo_piso">Tipo de Piso</label>
+                <select
+                  id="tipo_piso"
+                  name="tipo_piso"
+                  onchange="updateState('detalhes', 'tipo_piso', this.value)"
+                >
+                  <option value="">Selecione</option>
+                  <option value="Aquecido">Aquecido</option>
+                  <option value="Ardósia">Ardósia</option>
+                  <option value="Bloquete">Bloquete</option>
+                  <option value="Carpete">Carpete</option>
+                  <option value="Carpete de acrílico">
+                    Carpete de acrílico
+                  </option>
+                  <option value="Carpete de madeira">Carpete de madeira</option>
+                  <option value="Carpete de nylon">Carpete de nylon</option>
+                  <option value="Cerâmica">Cerâmica</option>
+                  <option value="Cimento queimado">Cimento queimado</option>
+                  <option value="Contrapiso">Contrapiso</option>
+                  <option value="Emborrachado">Emborrachado</option>
+                  <option value="Granito">Granito</option>
+                  <option value="Laminado">Laminado</option>
+                  <option value="Mármore">Mármore</option>
+                  <option value="Porcelanato">Porcelanato</option>
+                  <option value="Tábua">Tábua</option>
+                  <option value="Taco de madeira">Taco de madeira</option>
+                  <option value="Vinílico">Vinílico</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="posicao_solar">Posição solar</label>
+                <select
+                  id="posicao_solar"
+                  name="posicao_solar"
+                  onchange="updateState('detalhes', 'posicao_solar', this.value)"
+                >
+                  <option value="">Selecione</option>
+                  <option value="Norte">Norte</option>
+                  <option value="Sul">Sul</option>
+                  <option value="Leste">Leste</option>
+                  <option value="Oeste">Oeste</option>
+                  <option value="Manhã">Manhã</option>
+                  <option value="Tarde">Tarde</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="step-content" data-step="4">
+            <div class="section-title">
+              <span class="emoji">📐</span> Áreas, Vagas e Cômodos
+            </div>
+            <div class="form-group">
+              <label for="area_util" class="required">Área útil (m²)</label>
+              <input
+                type="number"
+                id="area_util"
+                name="area_util"
+                placeholder="0"
+                min="0"
+                required
+                onchange="updateState('areas', 'area_util', this.value)"
+              />
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+  <label for="dormitorios" class="required">Dormitórios</label>
+  <div class="stepper-group">
+    <button
+      type="button"
+      class="stepper-button-new"
+      onclick="stepChange(this, -1)"
+    >
+      -
+    </button>
+    <input
+      type="number"
+      id="dormitorios"
+      name="dormitorios"
+      class="stepper-input-new"
+      placeholder="0"
+      min="0"
+      required
+      onchange="updateState('areas', 'dormitorios', this.value)"
+    />
+    <button
+      type="button"
+      class="stepper-button-new"
+      onclick="stepChange(this, 1)"
+    >
+      +
+    </button>
+  </div>
+</div>
+              <div class="form-group">
+  <label for="suítes">Suítes</label>
+  <div class="stepper-group">
+    <button
+      type="button"
+      class="stepper-button-new"
+      onclick="stepChange(this, -1)"
+    >
+      -
+    </button>
+    <input
+      type="number"
+      id="suítes"
+      name="suítes"
+      class="stepper-input-new"
+      placeholder="0"
+      min="0"
+      onchange="updateState('areas', 'suítes', this.value)"
+    />
+    <button
+      type="button"
+      class="stepper-button-new"
+      onclick="stepChange(this, 1)"
+    >
+      +
+    </button>
+  </div>
+</div>
+              <div class="form-group">
+                <label for="banheiros">Banheiros</label>
+                <div class="stepper-group">
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, -1)"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="banheiros"
+                    name="banheiros"
+                    class="stepper-input-new"
+                    placeholder="0"
+                    min="0"
+                    onchange="updateState('areas', 'banheiros', this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="vagas_garagem">Vagas de garagem</label>
+                <div class="stepper-group">
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, -1)"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="vagas_garagem"
+                    name="vagas_garagem"
+                    class="stepper-input-new"
+                    placeholder="0"
+                    min="0"
+                    onchange="updateState('areas', 'vagas_garagem', this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="coberta_descoberta">Coberta/Descoberta</label>
+                <select
+                  id="coberta_descoberta"
+                  name="coberta_descoberta"
+                  onchange="updateState('areas', 'coberta_descoberta', this.value)"
+                >
+                  <option value="N/A">N/A</option>
+                  <option value="Coberta">Coberta</option>
+                  <option value="Descoberta">Descoberta</option>
+                  <option value="Ambas">Ambas</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="vaga_propria"
+                  name="vaga_propria"
+                  onchange="updateCheckboxState('areas', 'vaga_propria', this.checked)"
+                />
+                <label for="vaga_propria">A(s) vaga(s) é(são) própria(s)</label>
+              </div>
+            </div>
+          </div>
+          <div class="step-content" data-step="5">
+            <div class="section-title">
+              <span class="emoji">🛋️</span> Recursos Internos do Imóvel
+            </div>
+            <label>Outras Opções</label>
+            <div
+              class="checkbox-grid col-4"
+              style="margin-top: 10px; margin-bottom: 28px"
+            >
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="exclusividade"
+                  name="imóvel_flags"
+                  value="Exclusividade"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="exclusividade"
+                  ><i class="fa-solid fa-gem"></i> <span>Exclusividade</span></label
+                >
+              </div>
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="mobiliado"
+                  name="imóvel_flags"
+                  value="Mobiliado"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="mobiliado"
+                  ><i class="fa-solid fa-couch"></i> <span>Mobiliado</span></label
+                >
+              </div>
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="imóvel_ocupado"
+                  name="imóvel_flags"
+                  value="Imóvel Ocupado"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="imóvel_ocupado"
+                  ><i class="fa-solid fa-key"></i>
+                  <span>Imóvel Ocupado</span></label
+                >
+              </div>
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="aceita_pet"
+                  name="imóvel_flags"
+                  value="Aceita Pet"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="aceita_pet"
+                  ><i class="fa-solid fa-paw"></i> <span>Aceita Pet</span></label
+                >
+              </div>
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="sacada"
+                  name="imóvel_flags"
+                  value="Sacada"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="sacada"
+                  ><i class="fa-solid fa-wind"></i> <span>Sacada</span></label
+                >
+              </div>
+              <div class="checkbox-item compact">
+                <input
+                  type="checkbox"
+                  id="varanda"
+                  name="imóvel_flags"
+                  value="Varanda"
+                  onchange="updateCheckboxGroupState('recursos', 'imóvel_flags', 'imóvel_flags')"
+                />
+                <label for="varanda"
+                  ><i class="fa-solid fa-chair"></i></i> <span>Varanda</span></label
+                >
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Armários</label>
+              <div class="checkbox-grid col-3">
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_servico"
+                    name="armarios"
+                    value="Área de serviço"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_servico"
+                    ><i class="fa-solid fa-jug-detergent"></i>
+                    <span>Área de serviço</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_banheiro"
+                    name="armarios"
+                    value="Banheiro"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_banheiro"
+                    ><i class="fa-solid fa-bath"></i> <span>Banheiro</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_closet"
+                    name="armarios"
+                    value="Closet"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_closet"
+                    ><i class="fa-solid fa-person-shelter"></i>
+                    <span>Closet</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_corredor"
+                    name="armarios"
+                    value="Corredor"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_corredor"
+                    ><i class="fa-solid fa-road"></i> <span>Corredor</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_cozinha"
+                    name="armarios"
+                    value="Cozinha"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_cozinha"
+                    ><i class="fa-solid fa-kitchen-set"></i>
+                    <span>Cozinha</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_dormitorios"
+                    name="armarios"
+                    value="Dormitórios"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_dormitorios"
+                    ><i class="fa-solid fa-bed"></i> <span>Dormitórios</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_dorm_empregada"
+                    name="armarios"
+                    value="Dorm. Empregada"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_dorm_empregada"
+                    ><i class="fa-solid fa-broom"></i>
+                    <span>Dorm. Empregada</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_escritorio"
+                    name="armarios"
+                    value="Escritório"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_escritorio"
+                    ><i class="fa-solid fa-briefcase"></i>
+                    <span>Escritório</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_home_theater"
+                    name="armarios"
+                    value="Home theater/cinema"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_home_theater"
+                    ><i class="fa-solid fa-film"></i>
+                    <span>Home theater/cinema</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="armario_sala"
+                    name="armarios"
+                    value="Sala"
+                    onchange="updateCheckboxGroupState('recursos', 'armarios', 'armarios')"
+                  /><label for="armario_sala"
+                    ><i class="fa-solid fa-tv"></i> <span>Sala</span></label
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Serviços</label>
+              <div class="checkbox-grid col-3">
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_servico"
+                    name="servicos"
+                    value="Área de serviço"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_servico"
+                    ><i class="fa-solid fa-jug-detergent"></i>
+                    <span>Área de serviço</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_ban_empregada"
+                    name="servicos"
+                    value="Ban. de empregada"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_ban_empregada"
+                    ><i class="fa-solid fa-shower"></i>
+                    <span>Ban. de empregada</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_copa"
+                    name="servicos"
+                    value="Copa"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_copa"
+                    ><i class="fa-solid fa-mug-saucer"></i> <span>Copa</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_cozinha"
+                    name="servicos"
+                    value="Cozinha"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_cozinha"
+                    ><i class="fa-solid fa-kitchen-set"></i>
+                    <span>Cozinha</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_despensa"
+                    name="servicos"
+                    value="Despensa"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_despensa"
+                    ><i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Despensa</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_dorm_empregada"
+                    name="servicos"
+                    value="Dorm. Empregada"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_dorm_empregada"
+                    ><i class="fa-solid fa-person-simple"></i>
+                    <span>Dorm. Empregada</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_lavanderia"
+                    name="servicos"
+                    value="Lavanderia"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_lavanderia"
+                    ><i class="fa-solid fa-soap"></i> <span>Lavanderia</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="servico_zelador"
+                    name="servicos"
+                    value="Zelador"
+                    onchange="updateCheckboxGroupState('recursos', 'servicos', 'servicos')"
+                  /><label for="servico_zelador"
+                    ><i class="fa-solid fa-user-shield"></i>
+                    <span>Zelador</span></label
+                  >
+                </div>
+              </div>
+            </div>
+
+
+
+            <div class="form-group">
+              <label for="outras_caracteristicas">Outras Características</label>
+              <textarea
+                id="outras_caracteristicas"
+                name="outras_caracteristicas"
+                placeholder="Ex: Ar-condicionado, armários embutidos, piso de madeira..."
+                onkeyup="updateCharCount(this)"
+                onchange="updateState('recursos', 'outras_caracteristicas', this.value)"
+              ></textarea>
+              <div class="field-counter"><span id="charCount">0</span>/500</div>
+              <span class="field-hint"
+                >Detalhe outros atributos internos do imóvel.</span
+              >
+            </div>
+          </div>
+          <div class="step-content" data-step="6">
+            <div class="section-title">
+              <span class="emoji">🏢</span> Detalhes do Prédio
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nome_condominio">Nome do Condomínio</label>
+                <input
+                  type="text"
+                  id="nome_condominio"
+                  name="nome_condominio"
+                  placeholder="Ex: Edifício Bella Vista"
+                  onchange="updateState('predio', 'nome_condominio', this.value)"
+                />
+              </div>
+              <div class="form-group">
+                <label for="ano_construcao">Ano de Construção</label>
+                <input
+                  type="number"
+                  id="ano_construcao"
+                  name="ano_construcao"
+                  placeholder="Ex: 2010"
+                  min="1900"
+                  max="2099"
+                  onchange="updateState('predio', 'ano_construcao', this.value)"
+                />
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="n_andares">Nº de andares</label>
+                <div class="stepper-group">
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, -1)"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="n_andares"
+                    name="n_andares"
+                    class="stepper-input-new"
+                    placeholder="0"
+                    min="0"
+                    onchange="updateState('predio', 'n_andares', this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="unidades_andar">Unidades/andar</label>
+                <div class="stepper-group">
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, -1)"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="unidades_andar"
+                    name="unidades_andar"
+                    class="stepper-input-new"
+                    placeholder="0"
+                    min="0"
+                    onchange="updateState('predio', 'unidades_andar', this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="torres">Torres</label>
+                <div class="stepper-group">
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, -1)"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="torres"
+                    name="torres"
+                    class="stepper-input-new"
+                    placeholder="0"
+                    min="0"
+                    onchange="updateState('predio', 'torres', this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="stepper-button-new"
+                    onclick="stepChange(this, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step-content" data-step="7">
+            <div class="section-title">
+              <span class="emoji">🏊</span> Lazer e Segurança do Condomínio
+            </div>
+            <div class="form-group">
+              <label>Lazer</label>
+              <div class="checkbox-grid col-3">
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_academia"
+                    name="lazer"
+                    value="Academia"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_academia"
+                    ><i class="fa-solid fa-dumbbell"></i> <span>Academia</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_adega"
+                    name="lazer"
+                    value="Adega"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_adega"
+                    ><i class="fa-solid fa-wine-bottle"></i> <span>Adega</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_campo"
+                    name="lazer"
+                    value="Campo de futebol"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_campo"
+                    ><i class="fa-solid fa-futbol"></i>
+                    <span>Campo de futebol</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_cinema"
+                    name="lazer"
+                    value="Cinema"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_cinema"
+                    ><i class="fa-solid fa-film"></i> <span>Cinema</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_churrasqueira"
+                    name="lazer"
+                    value="Churrasqueira"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_churrasqueira"
+                    ><i class="fa-solid fa-fire-burner"></i>
+                    <span>Churrasqueira</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_gourmet"
+                    name="lazer"
+                    value="Espaço gourmet"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_gourmet"
+                    ><i class="fa-solid fa-utensils"></i>
+                    <span>Espaço gourmet</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_piscina"
+                    name="lazer"
+                    value="Piscina"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_piscina"
+                    ><i class="fa-solid fa-person-swimming"></i>
+                    <span>Piscina</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_squash"
+                    name="lazer"
+                    value="Quadra de squash"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_squash"
+                    ><i class="fa-solid fa-table-tennis-paddle-ball"></i>
+                    <span>Quadra de squash</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_tenis"
+                    name="lazer"
+                    value="Quadra de tênis"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_tenis"
+                    ><i class="fa-solid fa-table-tennis-paddle-ball"></i>
+                    <span>Quadra de tênis</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_poliesportiva"
+                    name="lazer"
+                    value="Quadra poliesportiva"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_poliesportiva"
+                    ><i class="fa-solid fa-basketball"></i>
+                    <span>Quadra poliesportiva</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_playground"
+                    name="lazer"
+                    value="Playground"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_playground"
+                    ><i class="fa-solid fa-shapes"></i> <span>Playground</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_salao_festas"
+                    name="lazer"
+                    value="Salão de festas"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_salao_festas"
+                    ><i class="fa-solid fa-cake-candles"></i>
+                    <span>Salão de festas</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="lazer_salao_jogos"
+                    name="lazer"
+                    value="Salão de jogos"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'lazer', 'lazer')"
+                  /><label for="lazer_salao_jogos"
+                    ><i class="fa-solid fa-gamepad"></i>
+                    <span>Salão de jogos</span></label
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Comodidades e Serviços</label>
+              <div class="checkbox-grid col-3">
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_bicicletario"
+                    name="comodidades"
+                    value="Bicicletário"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_bicicletario"
+                    ><i class="fa-solid fa-bicycle"></i>
+                    <span>Bicicletário</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_acesso_def"
+                    name="comodidades"
+                    value="Acesso p/deficientes"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_acesso_def"
+                    ><i class="fa-solid fa-wheelchair"></i>
+                    <span>Acesso p/deficientes</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_coworking"
+                    name="comodidades"
+                    value="Coworking"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_coworking"
+                    ><i class="fa-solid fa-laptop"></i> <span>Coworking</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_elevador"
+                    name="comodidades"
+                    value="Elevador"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_elevador"
+                    ><i class="fa-solid fa-elevator"></i> <span>Elevador</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_estacionamento"
+                    name="comodidades"
+                    value="Estacionamento"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_estacionamento"
+                    ><i class="fa-solid fa-car"></i>
+                    <span>Estacionamento</span></lebel
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_lavanderia"
+                    name="comodidades"
+                    value="Lavanderia"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_lavanderia"
+                    ><i class="fa-solid fa-soap"></i> <span>Lavanderia</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_sauna"
+                    name="comodidades"
+                    value="Sauna"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_sauna"
+                    ><i class="fa-solid fa-hot-tub-person"></i>
+                    <span>Sauna</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_spa"
+                    name="comodidades"
+                    value="Spa"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_spa"
+                    ><i class="fa-solid fa-spa"></i> <span>Spa</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_ofuro"
+                    name="comodidades"
+                    value="Ofurô"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_ofuro"
+                    ><i class="fa-solid fa-bath"></i> <span>Ofurô</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_solarium"
+                    name="comodidades"
+                    value="Solarium"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_solarium"
+                    ><i class="fa-solid fa-sun"></i> <span>Solarium</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="com_vestiario"
+                    name="comodidades"
+                    value="Vestiário"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'comodidades', 'comodidades')"
+                  /><label for="com_vestiario"
+                    ><i class="fa-solid fa-shirt"></i> <span>Vestiário</span></label
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Segurança</label>
+              <div class="checkbox-grid col-3">
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="seg_cond_fechado"
+                    name="seguranca"
+                    value="Condomínio fechado"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'seguranca', 'seguranca')"
+                  /><label for="seg_cond_fechado"
+                    ><i class="fa-solid fa-lock"></i>
+                    <span>Condomínio fechado</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="seg_portao"
+                    name="seguranca"
+                    value="Portão eletrônico"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'seguranca', 'seguranca')"
+                  /><label for="seg_portao"
+                    ><i class="fa-solid fa-key"></i>
+                    <span>Portão eletrônico</span></label
+                  >
+                </div>
+                <div class="checkbox-item compact">
+                  <input
+                    type="checkbox"
+                    id="seg_portaria"
+                    name="seguranca"
+                    value="Portaria 24h"
+                    onchange="updateCheckboxGroupState('lazerSeguranca', 'seguranca', 'seguranca')"
+                  /><label for="seg_portaria"
+                    ><i class="fa-solid fa-user-shield"></i>
+                    <span>Portaria 24h</span></label
+                  >
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+          <div class="step-content" data-step="8">
+            <div class="section-title">
+              <span class="emoji">💰</span> Valores
+            </div>
+            <div class="form-group">
+              <label for="valor_venda" class="required"
+                >Valor de Venda (R$)</label
+              >
+              <input
+                type="text"
+                id="valor_venda"
+                name="valor_venda"
+                placeholder="R$ 0,00"
+                required
+                onchange="updateState('valores', 'valor_venda', this.value)"
+              />
+              <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="valor_condominio">Valor do Condomínio (R$)</label>
+              <input
+                type="text"
+                id="valor_condominio"
+                name="valor_condominio"
+                placeholder="R$ 0,00"
+                onchange="updateState('valores', 'valor_condominio', this.value)"
+              />
+            </div>
+            <div class="form-group">
+              <label for="valor_iptu">Valor do IPTU (R$)</label>
+              <input
+                type="text"
+                id="valor_iptu"
+                name="valor_iptu"
+                placeholder="R$ 0,00"
+                onchange="updateState('valores', 'valor_iptu', this.value)"
+              />
+            </div>
+          </div>
+
+          <div class="step-content" data-step="9">
+  <div class="review-header">
+    <h2 class="review-title">✅ Revisão do Cadastro</h2>
+    <p class="review-subtitle" id="summaryEndereco">-</p>
+  </div>
+
+  <div class="button-group-top">
+    <button
+      type="button"
+      class="btn-primary btn-mobile-only"
+      id="btnCopiarResumoMobile"
+      style="display: none"
+    >
+      📱 Compartilhar Resumo
+    </button>
+    <button
+      type="button"
+      class="btn-primary btn-desktop-only"
+      id="btnCopiarResumoDesktop"
+      style="display: none"
+    >
+      📋 Copiar Resumo (Markdown)
+    </button>
+  </div>
+
+  <div class="review-container">
+    <div class="review-card">
+      <div class="review-row">
+        <span class="review-label">Nome</span>
+        <span class="review-value" id="summaryNome">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Email</span>
+        <span class="review-value" id="summaryEmail">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Celular</span>
+        <span class="review-value" id="summaryCelular">-</span>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-row">
+        <span class="review-label">Tipo de Imóvel</span>
+        <span class="review-value" id="summaryTipo">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Finalidade</span>
+        <span class="review-value" id="summaryFinalidade">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Área Útil</span>
+        <span class="review-value" id="summaryArea">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Configuração</span>
+        <span class="review-value" id="summaryQuartos">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Vagas de Garagem</span>
+        <span class="review-value" id="summaryVagas">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Padrão</span>
+        <span class="review-value" id="summaryPadraoImovel">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Tipo de Piso</span>
+        <span class="review-value" id="summaryTipoPiso">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Posição Solar</span>
+        <span class="review-value" id="summaryPosicaoSolar">-</span>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-row">
+        <span class="review-label">Condomínio</span>
+        <span class="review-value" id="summaryCondoNome">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Ano de Construção</span>
+        <span class="review-value" id="summaryCondoAno">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Nº de Andares</span>
+        <span class="review-value" id="summaryAndares">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Unidades/Andar</span>
+        <span class="review-value" id="summaryUnidadesAndar">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Torres</span>
+        <span class="review-value" id="summaryTorres">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Padrão Localização</span>
+        <span class="review-value" id="summaryPadraoLocalizacao">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Ponto de Referência</span>
+        <span class="review-value" id="summaryPontoReferencia">-</span>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-row">
+        <span class="review-label" id="summaryValorLabel">Valor Principal</span>
+        <span class="review-value" id="summaryValor">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Valor Condomínio</span>
+        <span class="review-value" id="summaryCondoValor">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Valor IPTU</span>
+        <span class="review-value" id="summaryIptuValor">-</span>
+      </div>
+      <div class="review-row">
+        <span class="review-label">Cód IPTU</span>
+        <span class="review-value" id="summaryCodIptu">-</span>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-row pill-row">
+        <span class="review-label">Outras Opções</span>
+        <div
+          class="summary-value full-width"
+          id="summaryImovelFlags"
+        >
+          -
+        </div>
+      </div>
+      <div class="review-row pill-row">
+        <span class="review-label">Armários</span>
+        <div class="summary-value full-width" id="summaryArmarios">
+          -
+        </div>
+      </div>
+      <div class="review-row pill-row">
+        <span class="review-label">Serviços</span>
+        <div class="summary-value full-width" id="summaryServicos">
+          -
+        </div>
+      </div>
+      <div class="review-row pill-row">
+        <span class="review-label">Lazer</span>
+        <div class="summary-value full-width" id="summaryLazer">-</div>
+      </div>
+      <div class="review-row pill-row">
+        <span class="review-label">Comodidades</span>
+        <div
+          class="summary-value full-width"
+          id="summaryComodidades"
+        >
+          -
+        </div>
+      </div>
+      <div class="review-row pill-row">
+        <span class="review-label">Segurança</span>
+        <div
+          class="summary-value full-width"
+          id="summarySeguranca"
+        >
+          -
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-row column">
+        <span class="review-label">Outras Características</span>
+        <span
+          class="summary-value full-width"
+          id="summaryOutrasCaracteristicas"
+          >-</span
+        >
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+          <div class="button-group">
+            <div>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="btnVoltar"
+                style="display: none"
+              >
+                ← Voltar
+              </button>
+            </div>
+            <div>
+              <button type="button" class="btn-primary" id="btnProximo">
+                Próximo →
+              </button>
+
+              </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="script.js"></script>
+    <div id="microToast" aria-live="polite" style="display: none"></div>
+  </body>
+</html>

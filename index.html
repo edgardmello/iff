@@ -1,284 +1,2387 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Imóveis Fernanda Freitas - Marca D'Água</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Real Estate Toolkit - Rio de Janeiro</title>
 
-    <!-- JSZip -->
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb", // Blue-600 logic
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "sidebar-bg": "#111418",
+                        "sidebar-border": "#283039"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/imask"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
     <style>
-      :root {
-        --bg: #f5f6f8;
-        --card: #ffffff;
-        --text: #1f2937;
-        --muted: #6b7280;
-        --accent: #2563eb;
-        --radius: 12px;
-      }
+        /* Base styles */
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-      * {
-        box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-          Roboto;
-      }
+        /* Tab Transitions */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-      body {
-        margin: 0;
-        padding: 32px;
-        background: var(--bg);
-        color: var(--text);
-      }
+        /* Result Cards */
+        .result-card {
+            background: linear-gradient(to right, #ffffff, #f8fafc);
+            border-left: 5px solid #2563eb;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-top: 1.5rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+            position: relative; /* For copy button positioning */
+        }
+        .dark .result-card { background: linear-gradient(to right, #1f2937, #111827); border-left-color: #60a5fa; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-      .container {
-        max-width: 900px;
-        margin: auto;
-      }
+        .result-big-value { display: block; font-size: 1.875rem; font-weight: 800; color: #1e3a8a; line-height: 1.2; margin-bottom: 0.5rem; }
+        .dark .result-big-value { color: #e0e7ff; }
 
-      h1 {
-        font-size: 1.5rem;
-        margin-bottom: 8px;
-      }
+        /* Checklist Styles */
+        .checklist-item:hover { background-color: rgba(0,0,0,0.05); }
+        .dark .checklist-item:hover { background-color: rgba(255,255,255,0.05); }
+        .checklist-checkbox:checked + div .checklist-text { text-decoration: line-through; opacity: 0.6; }
 
-      p {
-        color: var(--muted);
-        margin-bottom: 24px;
-      }
+        /* Scrollbar styling for sidebar */
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: #283039; border-radius: 2px; }
 
-      .card {
-        background: var(--card);
-        border-radius: var(--radius);
-        padding: 24px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-        margin-bottom: 24px;
-      }
+        /* Chart Container */
+        .chart-container { position: relative; width: 100%; height: 300px; }
 
-      .controls {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-      }
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            animation: scaleUp 0.2s ease-out;
+        }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-      label {
-        font-size: 0.85rem;
-        color: var(--muted);
-        display: block;
-        margin-bottom: 6px;
-      }
+        /* Market Table Styles */
+        .market-row:nth-child(even) { background-color: rgba(0,0,0,0.02); }
+        .dark .market-row:nth-child(even) { background-color: rgba(255,255,255,0.02); }
 
-      input[type='file'],
-      input[type='range'] {
-        width: 100%;
-      }
+        /* Print Override */
+        @media print {
+            aside, header { display: none !important; }
+            main { margin: 0; padding: 0; width: 100%; }
+            #checklist-container { display: block !important; }
+        }
 
-      input[type='range'] {
-        accent-color: var(--accent);
-      }
+        /* Legislation Section */
+        .law-section {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .dark .law-section {
+            background: #1d252d;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .law-card {
+            border-left: 3px solid #60a5fa; /* blue-400 */
+            background: #f8fafc; /* slate-50 */
+            padding: 1rem;
+            border-radius: 0.25rem;
+        }
+        .dark .law-card {
+            border-left-color: #3b82f6; /* blue-500 */
+            background: #283039; /* darker than main dark background */
+        }
 
-      button {
-        background: var(--accent);
-        color: #fff;
-        border: none;
-        padding: 12px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 500;
-      }
-
-      button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .preview {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 16px;
-      }
-
-      .preview img {
-        width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      }
-
-      footer {
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--muted);
-        margin-top: 24px;
-      }
+        /* Future Section */
+        .future-card {
+            background: #f0f9ff; /* Blue-50 */
+            border-left: 4px solid #3b82f6; /* Blue-500 */
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .dark .future-card {
+            background: #1e3a8a20; /* Darker blue shade */
+            border-left-color: #60a5fa;
+        }
+        /* Mobile Dashboard Grid */
+        .mobile-hub-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .dark .mobile-hub-card {
+            background: #1d252d;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        .mobile-hub-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+            border: 1px solid #2563eb;
+        }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Imóveis Fernanda Freitas - Marca D'Água</h1>
-      <p>
-        Faça upload de imagens, aplique uma marca d'água de logotipo
-        centralizado e baixe tudo como um ZIP.
-      </p>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display transition-colors duration-200">
 
-      <div class="card">
-        <div class="controls">
-          <div>
-            <label>Enviar imagens (escolha multiplas imgs)</label>
-            <input type="file" id="imagesInput" multiple accept="image/*" />
-          </div>
+<div class="relative flex h-screen w-full overflow-hidden">
 
-          <div>
-            <label>Enviar Logo</label>
-            <input type="file" id="logoInput" accept="image/*" />
-          </div>
-
-          <div>
-            <label>Opacidade: <span id="opacityValue">0.30</span></label>
-            <input
-              type="range"
-              id="opacity"
-              min="0.05"
-              max="1"
-              step="0.05"
-              value="0.3"
-            />
-          </div>
-
-          <div>
-            <label>Tamanho Marca D'Água: <span id="sizeValue">30%</span></label>
-            <input
-              type="range"
-              id="size"
-              min="10"
-              max="80"
-              step="5"
-              value="30"
-            />
-          </div>
-
-          <div style="align-self: end">
-            <button id="downloadBtn" disabled>Download ZIP</button>
-          </div>
+    <!-- SIDEBAR: Escondido em telas pequenas, visível a partir de tablet/desktop (md) -->
+    <aside class="hidden md:flex w-64 flex-col bg-sidebar-bg border-r border-solid border-sidebar-border transition-all duration-300 z-20 flex-shrink-0">
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5 p-5 border-b border-sidebar-border">
+            <div class="size-8 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-3xl">real_estate_agent</span>
+            </div>
+            <h2 class="text-white text-lg font-bold leading-tight">Toolkit RJ</h2>
         </div>
 
-        <div class="preview" id="preview"></div>
-      </div>
+        <!-- Navigation Menu -->
+        <div class="flex flex-col gap-1 p-3 overflow-y-auto flex-1">
+            <!-- NOVO DASHBOARD MOBILE (Aparece no desktop tbm) -->
+            <button onclick="switchTab('mobile-dashboard')" id="btn-mobile-dashboard" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">dashboard</span>
+                <p class="text-sm font-medium">Dashboard Rápido</p>
+            </button>
 
-      <!-- <footer>Simple Watermark Tool · Offline-ready · No backend</footer> -->
+            <button onclick="switchTab('calculators')" id="btn-calculators" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">calculate</span>
+                <p class="text-sm font-medium">Calculadoras</p>
+            </button>
+
+            <button onclick="switchTab('market')" id="btn-market" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">analytics</span>
+                <p class="text-sm font-medium">Dados de Mercado</p>
+            </button>
+
+            <button onclick="switchTab('links')" id="btn-links" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">link</span>
+                <p class="text-sm font-medium">Links Úteis</p>
+            </button>
+
+            <button onclick="switchTab('legislation')" id="btn-legislation" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">balance</span>
+                <p class="text-sm font-medium">Legislação</p>
+            </button>
+
+            <button onclick="switchTab('checklist')" id="btn-checklist" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">checklist</span>
+                <p class="text-sm font-medium">Checklist</p>
+            </button>
+
+            <button onclick="switchTab('glossary')" id="btn-glossary" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                <span class="material-symbols-outlined">menu_book</span>
+                <p class="text-sm font-medium">Glossário</p>
+            </button>
+
+            <a href="form.html" target="_blank" class="nav-item flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left group">
+                <span class="material-symbols-outlined">description</span>
+                <p class="text-sm font-medium flex-1">Formulário</p>
+                <span class="material-symbols-outlined text-[18px] opacity-50 group-hover:opacity-100">open_in_new</span>
+            </a>
+        </div>
+
+        <!-- User / Theme Footer -->
+        <div class="mt-auto p-3 border-t border-sidebar-border">
+             <button id="theme-toggle" class="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+                <div class="flex flex-col text-left">
+                    <span class="text-sm font-medium">Alterar Tema</span>
+                    <span class="text-xs text-gray-500">Claro / Escuro</span>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MOBILE NAVIGATION MENU (Hidden by default, visible on small screens when toggled) -->
+    <div id="mobile-nav-menu" class="fixed inset-0 z-40 md:hidden hidden">
+        <!-- Overlay for closing the menu -->
+        <div onclick="toggleMobileMenu()" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+        <!-- Menu Content -->
+        <div class="absolute left-0 top-0 h-full w-64 flex flex-col bg-sidebar-bg border-r border-solid border-sidebar-border shadow-2xl overflow-y-auto">
+            <!-- Logo (repeated for context) -->
+            <div class="flex items-center gap-2.5 p-5 border-b border-sidebar-border">
+                <div class="size-8 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-3xl">real_estate_agent</span>
+                </div>
+                <h2 class="text-white text-lg font-bold leading-tight">Menu</h2>
+            </div>
+
+            <!-- Navigation Links (Copied from aside) -->
+            <div class="flex flex-col gap-1 p-3 flex-1">
+                <!-- DASHBOARD MOBILE -->
+                <button onclick="switchTab('mobile-dashboard')" id="mobile-btn-mobile-dashboard" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <p class="text-sm font-medium">Dashboard Rápido</p>
+                </button>
+
+                <button onclick="switchTab('calculators')" id="mobile-btn-calculators" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">calculate</span>
+                    <p class="text-sm font-medium">Calculadoras</p>
+                </button>
+
+                <button onclick="switchTab('market')" id="mobile-btn-market" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <p class="text-sm font-medium">Dados de Mercado</p>
+                </button>
+
+                <button onclick="switchTab('links')" id="mobile-btn-links" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">link</span>
+                    <p class="text-sm font-medium">Links Úteis</p>
+                </button>
+
+                 <button onclick="switchTab('legislation')" id="mobile-btn-legislation" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">balance</span>
+                    <p class="text-sm font-medium">Legislação</p>
+                </button>
+
+                <button onclick="switchTab('checklist')" id="mobile-btn-checklist" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">checklist</span>
+                    <p class="text-sm font-medium">Checklist</p>
+                </button>
+
+                <button onclick="switchTab('glossary')" id="mobile-btn-glossary" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    <p class="text-sm font-medium">Glossário</p>
+                </button>
+
+                 <!-- FUTURO & IDEIAS -->
+                <button onclick="switchTab('future')" id="mobile-btn-future" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                    <p class="text-sm font-medium">Futuro & Ideias</p>
+                </button>
+
+                <a href="form.html" target="_blank" class="nav-item-mobile flex items-center gap-3 px-3 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left group">
+                    <span class="material-symbols-outlined">description</span>
+                    <p class="text-sm font-medium flex-1">Formulário</p>
+                    <span class="material-symbols-outlined text-[18px] opacity-50 group-hover:opacity-100">open_in_new</span>
+                </a>
+            </div>
+
+            <!-- Theme Toggle (Copied from aside footer) -->
+             <div class="mt-auto p-3 border-t border-sidebar-border">
+                 <button id="theme-toggle-mobile" onclick="toggleTheme()" class="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                    <span class="material-symbols-outlined" id="mobile-theme-icon">dark_mode</span>
+                    <div class="flex flex-col text-left">
+                        <span class="text-sm font-medium">Alterar Tema</span>
+                        <span class="text-xs text-gray-500">Claro / Escuro</span>
+                    </div>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <script>
-      const imagesInput = document.getElementById('imagesInput');
-      const logoInput = document.getElementById('logoInput');
-      const opacityInput = document.getElementById('opacity');
-      const sizeInput = document.getElementById('size');
-      const opacityValue = document.getElementById('opacityValue');
-      const sizeValue = document.getElementById('sizeValue');
-      const preview = document.getElementById('preview');
-      const downloadBtn = document.getElementById('downloadBtn');
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden">
 
-      let images = [];
-      let logo = null;
-      let processed = [];
+        <!-- Top Bar (UPDATED: Added Future/Ideas Button) -->
+        <header class="flex h-[72px] items-center justify-between border-b border-solid border-gray-200 dark:border-sidebar-border px-4 sm:px-8 py-3 bg-white dark:bg-sidebar-bg shrink-0">
+            <!-- Mobile Menu Toggle Button (Visible on Small Screens) -->
+            <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#283039] transition-colors text-slate-800 dark:text-white">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
 
-      opacityInput.addEventListener('input', updateAndProcess);
-      sizeInput.addEventListener('input', updateAndProcess);
+            <h1 class="text-xl font-bold text-slate-800 dark:text-white flex-1 md:flex-grow-0 ml-4 md:ml-0 leading-tight flex items-center gap-3" id="page-title-wrapper">
+                <span id="page-title">Dashboard Rápido</span>
 
-      imagesInput.addEventListener('change', (e) => {
-        images = Array.from(e.target.files);
-        if (logo) processImages();
-      });
+                <!-- BOTÃO DE FUTURO/IDEIAS NO HEADER (Visível a partir de md) -->
+                <button onclick="switchTab('future')" class="hidden md:block p-2 text-primary hover:text-primary/80 transition-colors" title="Futuro & Ideias">
+                    <span class="material-symbols-outlined text-2xl">rocket_launch</span>
+                </button>
+            </h1>
 
-      logoInput.addEventListener('change', (e) => {
-        logo = e.target.files[0];
-        if (images.length) processImages();
-      });
+            <div class="flex items-center gap-2">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-slate-700 dark:text-white">Rio de Janeiro</p>
+                    <p class="text-xs text-slate-500">Edição 2025</p>
+                </div>
+                <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                   <span class="material-symbols-outlined text-sm">location_on</span>
+                </div>
+            </div>
+        </header>
 
-      function updateAndProcess() {
-        opacityValue.textContent = opacityInput.value;
-        sizeValue.textContent = sizeInput.value + '%';
-        if (images.length && logo) processImages();
-      }
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth">
 
-      function processImages() {
-        preview.innerHTML = '';
-        processed = [];
-        downloadBtn.disabled = true;
+            <!-- NEW TAB: MOBILE DASHBOARD -->
+            <div id="mobile-dashboard" class="tab-content active h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Acesso Rápido (Corretor em Campo)</h2>
 
-        const logoImg = new Image();
-        logoImg.src = URL.createObjectURL(logo);
+                <p class="text-slate-500 dark:text-[#9dabb9] text-base font-normal mb-8">Acesse informações vitais e links externos essenciais diretamente daqui. Escolha uma ação rápida:</p>
 
-        logoImg.onload = async () => {
-          for (const file of images) {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
+                <!-- AÇÕES PRINCIPAIS (Calculadoras, Checklist, Glossário) -->
+                <h3 class="font-bold text-lg text-primary mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">Ferramentas Internas</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+                    <div onclick="switchTab('calculators')" class="mobile-hub-card text-primary">
+                         <span class="material-symbols-outlined text-4xl mb-2">calculate</span>
+                        <p class="text-sm font-medium text-center">Calculadoras</p>
+                    </div>
+                    <div onclick="switchTab('checklist')" class="mobile-hub-card text-teal-600 dark:text-teal-400">
+                         <span class="material-symbols-outlined text-4xl mb-2">checklist</span>
+                        <p class="text-sm font-medium text-center">Checklist Doc.</p>
+                    </div>
+                    <div onclick="switchTab('glossary')" class="mobile-hub-card text-purple-600 dark:text-purple-400">
+                         <span class="material-symbols-outlined text-4xl mb-2">menu_book</span>
+                        <p class="text-sm font-medium text-center">Glossário</p>
+                    </div>
+                    <div onclick="switchTab('market')" class="mobile-hub-card text-orange-600 dark:text-orange-400">
+                         <span class="material-symbols-outlined text-4xl mb-2">analytics</span>
+                        <p class="text-sm font-medium text-center">Dados Mercado</p>
+                    </div>
+                </div>
 
-            await new Promise((resolve) => {
-              img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+                <!-- LINKS EXTERNOS (Prefeitura, Cartório, Concessionárias) -->
+                <h3 class="font-bold text-lg text-primary mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">Links Externos e Órgãos</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-                canvas.width = img.width;
-                canvas.height = img.height;
+                    <!-- Linha 1: Prefeitura/Impostos -->
+                    <a href="https://carioca.rio/servicos/itbi-simulacao-de-valor-e-pedido-de-guia/" target="_blank" class="mobile-hub-card text-red-600 dark:text-red-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">location_city</span>
+                        <p class="text-xs font-medium text-center">Simular ITBI</p>
+                    </a>
+                    <a href="https://iportal.rio.rj.gov.br/PF331IPTUATUAL/pages/ParcelamentoIptuDs/TelaSelecao.aspx" target="_blank" class="mobile-hub-card text-red-600 dark:text-red-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">receipt_long</span>
+                        <p class="text-xs font-medium text-center">Débitos IPTU</p>
+                    </a>
+                    <a href="https://funesbom.rj.gov.br/" target="_blank" class="mobile-hub-card text-red-600 dark:text-red-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">fire_extinguisher</span>
+                        <p class="text-xs font-medium text-center">Taxa Incêndio</p>
+                    </a>
+                    <a href="https://www.gov.br/pt-br/servicos/emitir-certidao-de-regularidade-fiscal" target="_blank" class="mobile-hub-card text-red-600 dark:text-red-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">gavel</span>
+                        <p class="text-xs font-medium text-center">CND Federal</p>
+                    </a>
 
-                ctx.drawImage(img, 0, 0);
+                    <!-- Linha 2: Cartório/RGI -->
+                    <a href="https://www.registrodeimoveis.org.br/" target="_blank" class="mobile-hub-card text-indigo-600 dark:text-indigo-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">apartment</span>
+                        <p class="text-xs font-medium text-center">Registro de Imóveis</p>
+                    </a>
+                    <a href="https://24oficio.com.br/" target="_blank" class="mobile-hub-card text-indigo-600 dark:text-indigo-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">description</span>
+                        <p class="text-xs font-medium text-center">Cartório 24h</p>
+                    </a>
+                     <a href="https://www.planalto.gov.br/ccivil_03/leis/L6530.htm" target="_blank" class="mobile-hub-card text-indigo-600 dark:text-indigo-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">policy</span>
+                        <p class="text-xs font-medium text-center">Lei Corretor</p>
+                    </a>
+                     <a href="https://www.planalto.gov.br/ccivil_03/leis/l8245.htm" target="_blank" class="mobile-hub-card text-indigo-600 dark:text-indigo-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">home_work</span>
+                        <p class="text-xs font-medium text-center">Lei Inquilinato</p>
+                    </a>
 
-                const sizeRatio = sizeInput.value / 100;
-                const maxWidth = canvas.width * sizeRatio;
-                const scale = maxWidth / logoImg.width;
+                     <!-- Linha 3: Concessionárias -->
+                    <a href="https://www.light.com.br/" target="_blank" class="mobile-hub-card text-yellow-600 dark:text-yellow-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">bolt</span>
+                        <p class="text-xs font-medium text-center">Light (Energia)</p>
+                    </a>
+                     <a href="https://aguasdorio.com.br/" target="_blank" class="mobile-hub-card text-yellow-600 dark:text-yellow-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">water_drop</span>
+                        <p class="text-xs font-medium text-center">Águas do Rio</p>
+                    </a>
+                     <a href="https://naturgy.com.br/" target="_blank" class="mobile-hub-card text-yellow-600 dark:text-yellow-400">
+                        <span class="material-symbols-outlined text-4xl mb-2">gas_meter</span>
+                        <p class="text-xs font-medium text-center">Naturgy (Gás)</p>
+                    </a>
+                </div>
+            </div>
 
-                const w = logoImg.width * scale;
-                const h = logoImg.height * scale;
+            <!-- TAB: CALCULATORS -->
+            <div id="calculators" class="tab-content h-full">
 
-                ctx.globalAlpha = parseFloat(opacityInput.value);
-                ctx.drawImage(
-                  logoImg,
-                  (canvas.width - w) / 2,
-                  (canvas.height - h) / 2,
-                  w,
-                  h
-                );
+                <!-- 3A. GRID VIEW (Selector) -->
+                <div id="calculator-grid-view">
+                    <div class="flex flex-col gap-2 mb-8">
+                        <p class="text-slate-500 dark:text-[#9dabb9] text-base font-normal">Uma suíte completa de ferramentas para tomadas de decisão no RJ.</p>
+                        <!-- Search Bar -->
+                        <div class="relative w-full max-w-md mt-2">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400">search</span>
+                            <input type="text" id="calc-search" placeholder="Buscar calculadora..." class="w-full bg-white dark:bg-[#1d252d] border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
 
-                canvas.toBlob(
-                  (blob) => {
-                    processed.push({ name: file.name, blob });
-                    const previewImg = document.createElement('img');
-                    previewImg.src = URL.createObjectURL(blob);
-                    preview.appendChild(previewImg);
-                    resolve();
-                  },
-                  'image/jpeg',
-                  0.95
-                );
-              };
-            });
-          }
+                    <!-- ALTERADO: grid-cols-1 em mobile, sm:grid-cols-2 em tablet, lg:grid-cols-3 em desktop -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Cards generated by JS or static below -->
 
-          downloadBtn.disabled = false;
-        };
-      }
+                        <!-- 1. CTA -->
+                        <div onclick="openCalculator('calc-cta')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-blue-100 dark:bg-primary/20 text-primary p-3 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors"><span class="material-symbols-outlined">payments</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Custo de Aquisição</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Calcule o valor total da compra somando ITBI, Cartório e outras taxas.</p>
+                        </div>
 
-      downloadBtn.addEventListener('click', async () => {
-        downloadBtn.disabled = true;
+                        <!-- 2. PRICE -->
+                        <div onclick="openCalculator('calc-price')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 p-3 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">finance_mode</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Financiamento (PRICE)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Simulação com parcelas fixas. Ideal para planejamento de longo prazo.</p>
+                        </div>
 
-        const zip = new JSZip();
-        processed.forEach((file) => {
-          zip.file(file.name, file.blob);
+                        <!-- 3. SAC -->
+                        <div onclick="openCalculator('calc-sac')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 p-3 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">trending_down</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Financiamento (SAC)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Simulação com parcelas decrescentes. Amortização constante.</p>
+                        </div>
+
+                        <!-- 4. Buy vs Rent -->
+                        <div onclick="openCalculator('calc-buy-rent')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 p-3 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">balance</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Comprar vs. Alugar</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Compare o custo financeiro entre morar de aluguel ou financiar um imóvel.</p>
+                        </div>
+
+                        <!-- 5. Investiment -->
+                        <div onclick="openCalculator('calc-invest')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 p-3 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">savings</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Imóvel vs. Aplicação</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Descubra se vale mais a pena comprar um imóvel para alugar ou investir no CDI.</p>
+                        </div>
+
+                        <!-- 6. Rent Adjust -->
+                        <div onclick="openCalculator('calc-rent-adjust')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 p-3 rounded-lg group-hover:bg-teal-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">update</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Reajuste de Aluguel</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Calcule o novo valor do aluguel com base em índices como IGPM ou IPCA.</p>
+                        </div>
+
+                         <!-- 7. Laudêmio -->
+                         <div onclick="openCalculator('calc-laudemio')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 p-3 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">account_balance</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Laudêmio (RJ)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Cálculo específico para imóveis foreiros (SPU ou Municipal).</p>
+                        </div>
+
+                        <!-- 8. Yield -->
+                        <div onclick="openCalculator('calc-yield')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 p-3 rounded-lg group-hover:bg-yellow-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">percent</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Yield (Rentabilidade)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Calcule o retorno percentual anual de um imóvel alugado.</p>
+                        </div>
+
+                         <!-- 9. Commission -->
+                         <div onclick="openCalculator('calc-commission')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-3 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">handshake</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Comissão</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Divisão de valores de comissão entre imobiliária e corretor.</p>
+                        </div>
+
+                         <!-- 10. ITBI -->
+                         <div onclick="openCalculator('calc-itbi')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 p-3 rounded-lg group-hover:bg-pink-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">receipt_long</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">ITBI</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Imposto de Transmissão de Bens Imóveis (Prefeitura).</p>
+                        </div>
+
+                        <!-- 11. Area/PPM -->
+                        <div onclick="openCalculator('calc-ppm')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-400 p-3 rounded-lg group-hover:bg-gray-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">straighten</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Preço por m²</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Calcule o valor do metro quadrado ou a área total.</p>
+                        </div>
+                         <!-- 12. Area (Simple) -->
+                         <div onclick="openCalculator('calc-area')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-400 p-3 rounded-lg group-hover:bg-gray-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">square_foot</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Calculadora de Área</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Simples multiplicação de largura x comprimento.</p>
+                        </div>
+
+                         <!-- 13. Appreciation (CAGR) - NOVO -->
+                        <div onclick="openCalculator('calc-appreciation')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-3 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">trending_up</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Apreciação Anual (CAGR)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Calcula o crescimento anual composto do valor do imóvel ao longo do tempo.</p>
+                        </div>
+
+                        <!-- 14. Occupancy Cost - NOVO -->
+                        <div onclick="openCalculator('calc-occupancy')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 p-3 rounded-lg group-hover:bg-pink-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">real_estate_agent</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Custo de Ocupação (m²)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Cálculo do custo real por m² considerando aluguel, condomínio e IPTU.</p>
+                        </div>
+
+                        <!-- 15. Capital Gain Tax - NOVO -->
+                        <div onclick="openCalculator('calc-capital-gain')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 p-3 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Ganho de Capital (IRPF)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Simulação simplificada do Imposto de Renda sobre o lucro da venda.</p>
+                        </div>
+
+                        <!-- 16. Cartório Fees (Detailed) - NOVO -->
+                        <div onclick="openCalculator('calc-cartorio')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 p-3 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">description</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Custas Cartorárias (Detalhado)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Simulação das custas de Escritura e Registro (RGI) por faixa de valor do imóvel.</p>
+                        </div>
+
+                         <!-- 17. Custos de Financiamento (Total) - NOVO -->
+                        <div onclick="openCalculator('calc-finance-costs')" class="calc-card flex flex-col gap-4 p-5 rounded-xl bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent hover:border-primary shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 p-3 rounded-lg group-hover:bg-yellow-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">account_balance</span></div>
+                                <p class="text-slate-800 dark:text-white text-base font-medium">Custos de Financiamento (Total)</p>
+                            </div>
+                            <p class="text-slate-500 dark:text-[#9dabb9] text-sm">Taxas iniciais e custos mensais (vistoria, admin e seguros) cobrados pelos bancos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3B. ACTIVE CALCULATOR VIEW (Container que faltava) -->
+                <div id="calculator-active-view" class="hidden">
+
+                    <!-- Botão de Voltar para todas as Calculadoras -->
+                    <button onclick="closeCalculator()" class="mb-6 px-4 py-2 text-sm text-gray-700 dark:text-gray-400 bg-gray-100 dark:bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-[#1d252d] transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">arrow_back</span> Voltar para a lista
+                    </button>
+
+                    <!-- CALCULADORA 1: Custo de Aquisição (CTA) -->
+                    <div data-calculator="calc-cta" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Custo de Aquisição</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor do Imóvel</label><input type="text" id="cta-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Alíquota ITBI (%)</label><input type="number" id="cta-itbi-rate" value="3" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Custas Cartório/Registro (%)</label><input type="number" id="cta-cartorio-rate" value="1.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Outras Despesas (Ex: Vistoria)</label><input type="text" id="cta-outras" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="cta-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-cta')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 2: Financiamento (PRICE) -->
+                    <div data-calculator="calc-price" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Financiamento (Tabela PRICE)</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Total do Imóvel</label><input type="text" id="fin-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Entrada / Sinal</label><input type="text" id="fin-down" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa de Juros Anual (%)</label><input type="number" id="fin-rate" value="9.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Prazo (Anos)</label><input type="number" id="fin-term" value="30" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+                            <div id="fin-result" class="result-card"></div>
+                            <div class="chart-container"><canvas id="priceChart"></canvas></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-price')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 3: Financiamento (SAC) -->
+                    <div data-calculator="calc-sac" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Financiamento (Tabela SAC)</h2>
+                         <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Total do Imóvel</label><input type="text" id="sac-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Entrada / Sinal</label><input type="text" id="sac-down" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa de Juros Anual (%)</label><input type="number" id="sac-rate" value="9.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Prazo (Anos)</label><input type="number" id="sac-term" value="30" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+                            <div id="sac-result" class="result-card"></div>
+                            <div class="chart-container"><canvas id="sacChart"></canvas></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-sac')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 4: Comprar vs. Alugar (Buy vs Rent) -->
+                    <div data-calculator="calc-buy-rent" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Comprar vs. Alugar</h2>
+                         <p class="text-sm text-gray-500 mb-4">Calcula a diferença de custo mensal entre a parcela do financiamento (juros e seguro) e o aluguel, considerando o custo de oportunidade (Selic) do valor da entrada.</p>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Aluguel Mensal Estimado</label><input type="text" id="cbr-rent-val" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Preço do Imóvel para Compra</label><input type="text" id="cbr-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Entrada / Sinal</label><input type="text" id="cbr-downpayment" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Juros Financiamento Anual (%)</label><input type="number" id="cbr-rate" value="10.0" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa de Oportunidade (Selic/CDI) (%)</label><input type="number" id="cbr-selic" value="10.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+                            <div id="cbr-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-buy-rent')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 5: Imóvel vs. Aplicação (Investiment) -->
+                    <div data-calculator="calc-invest" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Imóvel vs. Aplicação Financeira</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor do Imóvel</label><input type="text" id="inv-amount" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Rendimento Bruto Mensal (Aluguel)</label><input type="text" id="inv-rent" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa de Vacância/Inadimplência (%)</label><input type="number" id="inv-vac" value="5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Rendimento Anual Aplicação (CDI/Selic) (%)</label><input type="number" id="inv-yield" value="10.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+                            <div id="inv-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-invest')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 6: Reajuste de Aluguel (Rent Adjust) -->
+                    <div data-calculator="calc-rent-adjust" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Reajuste de Aluguel</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Atual do Aluguel</label><input type="text" id="rent-current" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Índice de Reajuste (Ex: 3.5% = 3.5)</label><input type="number" id="rent-rate" value="3.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="rent-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-rent-adjust')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 7: Laudêmio (RJ) -->
+                    <div data-calculator="calc-laudemio" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Laudêmio (RJ/SPU)</h2>
+                        <p class="text-sm text-red-500 mb-4">O Laudêmio só incide sobre Imóveis Foreiros. Consulte a matrícula do imóvel para verificar se pertence à União ou Município.</p>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Total da Transação</label><input type="text" id="laud-total" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor da Terra (Terreno) - Opcional</label><input type="text" id="laud-land" placeholder="Se vazio, usa o valor total da transação" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div>
+                                <label class="block mb-1 text-sm text-gray-500">Tipo de Laudêmio (Alíquota)</label>
+                                <select id="laud-type" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg" onchange="runCalc()">
+                                    <option value="5">Terreno de Marinha (União - 5%)</option>
+                                    <option value="2.5">Municipal (Prefeitura - 2.5%)</option>
+                                    <option value="1">Outros (%)</option>
+                                </select>
+                            </div>
+                            <div id="laud-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-laudemio')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 8: Yield (Rentabilidade) -->
+                    <div data-calculator="calc-yield" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Yield (Rentabilidade Anual)</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Total do Imóvel</label><input type="text" id="yield-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Aluguel Mensal Recebido (Líquido)</label><input type="text" id="yield-rent" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="yield-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-yield')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 9: Comissão -->
+                    <div data-calculator="calc-commission" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Comissão de Corretagem</h2>
+                        <div class="space-y-4">
+                            <!-- CAMPO: Tipo de Transação -->
+                            <div>
+                                <label class="block mb-1 text-sm text-gray-500">Tipo de Transação</label>
+                                <select id="comm-type" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg appearance-none" onchange="updateCommType()">
+                                    <option value="venda">Venda</option>
+                                    <option value="locacao">Locação</option>
+                                </select>
+                            </div>
+
+                            <!-- Valores de Entrada -->
+                            <div>
+                                <label class="block mb-1 text-sm text-gray-500" id="label-comm-price">Valor Final da Venda</label>
+                                <input type="text" id="comm-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg">
+                            </div>
+
+                            <!-- Opções de Comissão (adaptadas dinamicamente) -->
+                            <div id="comm-pct-wrapper">
+                                <label class="block mb-1 text-sm text-gray-500">Percentual de Comissão Total (Ex: 6%)</label>
+                                <input type="number" id="comm-pct" value="6" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg">
+                            </div>
+
+                            <div>
+                                <label class="block mb-1 text-sm text-gray-500">Parte do Corretor (%)</label>
+                                <input type="number" id="comm-broker-pct" value="50" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+
+                            <div id="comm-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-commission')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 10: ITBI -->
+                    <div data-calculator="calc-itbi" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Cálculo de ITBI</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor de Mercado/Venal (o que for maior)</label><input type="text" id="itbi-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Alíquota ITBI (%)</label><input type="number" id="itbi-rate" value="3" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="itbi-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-itbi')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 11: Preço por m² (PPM) -->
+                    <div data-calculator="calc-ppm" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Preço por m²</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Preço Total do Imóvel</label><input type="text" id="ppm-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Área Total (m²)</label><input type="number" id="ppm-area" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="ppm-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-ppm')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 12: Área Simples -->
+                    <div data-calculator="calc-area" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Calculadora de Área (m²)</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Comprimento (m)</label><input type="number" id="area-len" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Largura (m)</label><input type="number" id="area-wid" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="area-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-area')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 13: Apreciação Anual (CAGR) - NOVO -->
+                    <div data-calculator="calc-appreciation" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Cálculo de Apreciação Anual (CAGR)</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor de Aquisição (Compra)</label><input type="text" id="appr-initial-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Atual/Venda</label><input type="text" id="appr-final-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Tempo de Posse (Anos)</label><input type="number" id="appr-years" value="5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="appr-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-appreciation')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 14: Custo de Ocupação (m²) - NOVO -->
+                    <div data-calculator="calc-occupancy" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Custo de Ocupação Mensal (Aluguel)</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor do Aluguel Mensal</label><input type="text" id="occ-rent" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor do Condomínio Mensal</label><input type="text" id="occ-condo" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor do IPTU Mensalizado</label><input type="text" id="occ-iptu" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Área Útil do Imóvel (m²)</label><input type="number" id="occ-area" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="occ-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-occupancy')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 15: Ganho de Capital (IRPF Simplificado) - NOVO -->
+                    <div data-calculator="calc-capital-gain" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Simulador de Ganho de Capital (IRPF Simplificado)</h2>
+                        <p class="text-sm text-yellow-600 dark:text-yellow-400 mb-4">*Esta é uma simulação. Consulte a legislação ou um contador para o cálculo exato, isenções e fatores de redução.</p>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor de Venda (Bruto)</label><input type="text" id="cg-sale-value" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Custo de Aquisição (Compra + Taxas)</label><input type="text" id="cg-acq-cost" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Custo de Reformas/Benfeitorias (Averbadas)</label><input type="text" id="cg-improvements" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="cg-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-capital-gain')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 16: Custas Cartorárias (Detalhado) - NOVO -->
+                    <div data-calculator="calc-cartorio" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Simulador de Custas Cartorárias (Detalhado)</h2>
+                        <p class="text-sm text-yellow-600 dark:text-yellow-400 mb-4">*Os valores são estimativas e simulações da progressividade da Tabela de Emolumentos do Tribunal de Justiça (RJ). Verifique o valor exato no seu cartório.</p>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor de Mercado/Transação (o que for maior)</label><input type="text" id="cart-price" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="cart-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-cartorio')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+                    <!-- CALCULADORA 17: Custos de Financiamento (Total) - NOVO -->
+                    <div data-calculator="calc-finance-costs" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Simulador de Custos de Financiamento (Total)</h2>
+                         <p class="text-sm text-yellow-600 dark:text-yellow-400 mb-4">*Custos iniciais obrigatórios (à vista) e taxas de seguro recorrentes (mensais), conforme exigência bancária.</p>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Valor Financiado (Principal)</label><input type="text" id="fin-cost-loan" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Prazo Total (Meses)</label><input type="number" id="fin-cost-term-m" value="360" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+
+                            <h3 class="font-semibold text-slate-800 dark:text-white mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">Custos Iniciais (À Vista)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa de Vistoria/Avaliação</label><input type="text" id="fin-cost-vistoria" value="3000" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Taxa Administrativa (Contrato)</label><input type="text" id="fin-cost-admin" value="1000" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+
+                            <h3 class="font-semibold text-slate-800 dark:text-white mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">Custos Recorrentes (Seguros)</h3>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block mb-1 text-sm text-gray-500">Seguro MIP (Mort. e Inv.) % anual</label><input type="number" id="fin-cost-mip-rate" value="0.5" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                                <div><label class="block mb-1 text-sm text-gray-500">Seguro DFI (Danos Físicos) % anual</label><input type="number" id="fin-cost-dfi-rate" value="0.03" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            </div>
+
+                            <div id="fin-cost-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-finance-costs')">Limpar Campos</button>
+                        </div>
+                    </div>
+
+
+                    <!-- CALCULADORA 18: Variação de Preço (Movida do grid, mantida a ordem numérica) -->
+                    <div data-calculator="calc-variation" class="calc-container hidden bg-white dark:bg-[#1d252d] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Variação de Preço</h2>
+                        <div class="space-y-4">
+                            <div><label class="block mb-1 text-sm text-gray-500">Preço Antigo</label><input type="text" id="var-old" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div><label class="block mb-1 text-sm text-gray-500">Preço Novo</label><input type="text" id="var-new" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg"></div>
+                            <div id="var-result" class="result-card"></div>
+                            <button class="text-sm text-red-500 hover:text-red-600 hover:underline mt-4" onclick="clearCalc('calc-variation')">Limpar Campos</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: MARKET DATA (NEW) -->
+            <div id="market" class="tab-content h-full">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Dados de Mercado (RJ)</h2>
+                        <p class="text-sm text-slate-500 dark:text-gray-400">Estimativas de Preço Médio por m² (2025)</p>
+                    </div>
+                </div>
+
+                <!-- ALTERADO: grid-cols-1 em mobile, md:grid-cols-2 em tablet/desktop -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- ZONA SUL -->
+                    <div class="bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 bg-blue-50 dark:bg-[#283039] border-b border-blue-100 dark:border-gray-700">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">beach_access</span> Zona Sul
+                            </h3>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-[#1d252d] border-b border-gray-100 dark:border-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3">Bairro</th>
+                                        <th class="px-4 py-3 text-right">Venda (m²)</th>
+                                        <th class="px-4 py-3 text-right">Aluguel (m²)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Leblon</td><td class="px-4 py-3 text-right">R$ 22.800</td><td class="px-4 py-3 text-right">R$ 95</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Ipanema</td><td class="px-4 py-3 text-right">R$ 21.500</td><td class="px-4 py-3 text-right">R$ 88</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Copacabana</td><td class="px-4 py-3 text-right">R$ 11.200</td><td class="px-4 py-3 text-right">R$ 62</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Botafogo</td><td class="px-4 py-3 text-right">R$ 13.500</td><td class="px-4 py-3 text-right">R$ 65</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Flamengo</td><td class="px-4 py-3 text-right">R$ 12.100</td><td class="px-4 py-3 text-right">R$ 58</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- BARRA & RECREIO -->
+                     <div class="bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 bg-teal-50 dark:bg-[#283039] border-b border-teal-100 dark:border-gray-700">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <span class="material-symbols-outlined text-teal-600">surfing</span> Barra & Recreio
+                            </h3>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-[#1d252d] border-b border-gray-100 dark:border-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3">Bairro</th>
+                                        <th class="px-4 py-3 text-right">Venda (m²)</th>
+                                        <th class="px-4 py-3 text-right">Aluguel (m²)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Jardim Oceânico</td><td class="px-4 py-3 text-right">R$ 14.500</td><td class="px-4 py-3 text-right">R$ 70</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Barra (Lúcio Costa)</td><td class="px-4 py-3 text-right">R$ 16.200</td><td class="px-4 py-3 text-right">R$ 75</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Barra (Américas)</td><td class="px-4 py-3 text-right">R$ 10.800</td><td class="px-4 py-3 text-right">R$ 55</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Recreio (Gleba A)</td><td class="px-4 py-3 text-right">R$ 8.500</td><td class="px-4 py-3 text-right">R$ 45</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Jacarepaguá</td><td class="px-4 py-3 text-right">R$ 6.200</td><td class="px-4 py-3 text-right">R$ 32</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ZONA NORTE -->
+                     <div class="bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 bg-orange-50 dark:bg-[#283039] border-b border-orange-100 dark:border-gray-700">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <span class="material-symbols-outlined text-orange-600">stadium</span> Zona Norte
+                            </h3>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-[#1d252d] border-b border-gray-100 dark:border-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3">Bairro</th>
+                                        <th class="px-4 py-3 text-right">Venda (m²)</th>
+                                        <th class="px-4 py-3 text-right">Aluguel (m²)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Tijuca</td><td class="px-4 py-3 text-right">R$ 7.800</td><td class="px-4 py-3 text-right">R$ 42</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Méier</td><td class="px-4 py-3 text-right">R$ 5.400</td><td class="px-4 py-3 text-right">R$ 28</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Maracanã</td><td class="px-4 py-3 text-right">R$ 7.200</td><td class="px-4 py-3 text-right">R$ 38</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Vila Isabel</td><td class="px-4 py-3 text-right">R$ 6.500</td><td class="px-4 py-3 text-right">R$ 34</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Ilha do Gov.</td><td class="px-4 py-3 text-right">R$ 5.900</td><td class="px-4 py-3 text-right">R$ 30</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <!-- CENTRO -->
+                     <div class="bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 bg-gray-50 dark:bg-[#283039] border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-600">business</span> Centro & Outros
+                            </h3>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-[#1d252d] border-b border-gray-100 dark:border-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3">Bairro</th>
+                                        <th class="px-4 py-3 text-right">Venda (m²)</th>
+                                        <th class="px-4 py-3 text-right">Aluguel (m²)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Centro</td><td class="px-4 py-3 text-right">R$ 7.500</td><td class="px-4 py-3 text-right">R$ 45</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Santa Teresa</td><td class="px-4 py-3 text-right">R$ 8.200</td><td class="px-4 py-3 text-right">R$ 48</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">São Conrado</td><td class="px-4 py-3 text-right">R$ 14.800</td><td class="px-4 py-3 text-right">R$ 68</td></tr>
+                                    <tr class="market-row"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Niterói (Icaraí)</td><td class="px-4 py-3 text-right">R$ 9.800</td><td class="px-4 py-3 text-right">R$ 44</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                 <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-yellow-600 shrink-0">info</span>
+                    <p>Os valores são estimativas médias de mercado para imóveis padrão. Imóveis de luxo, vista mar ou em comunidades podem variar drasticamente. Fonte: Análise de portais (Jan/25).</p>
+                </div>
+            </div>
+
+            <!-- TAB: LINKS -->
+            <div id="links" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Links Úteis</h2>
+                <!-- ALTERADO: grid-cols-1 em mobile, md:grid-cols-2 em tablet, lg:grid-cols-3 em desktop -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- PREFEITURA -->
+                    <div class="flex flex-col gap-3">
+                        <h3 class="font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary">location_city</span>
+                             Prefeitura & Impostos
+                        </h3>
+                        <a href="https://smfonlineitbi.smf.rio.rj.gov.br/cgi-bin/itbi2simulacao_cgi.exe/EntSimulacao" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Simulação ITBI</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://iportal.rio.rj.gov.br/PF331IPTUATUAL/pages/ParcelamentoIptuDs/TelaSelecao.aspx" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Débitos IPTU</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://funesbom.rj.gov.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Taxa de Incêndio (Funesbom)</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                    </div>
+
+                    <!-- CARTÓRIOS & LEGISLAÇÃO (Título atualizado) -->
+                    <div class="flex flex-col gap-3">
+                        <h3 class="font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary">gavel</span>
+                             Cartórios & Documentos
+                        </h3>
+                        <a href="https://www.registrodeimoveis.org.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Registro de Imóveis (ONR)</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://24oficio.com.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Cartório 24 Horas</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://www.gov.br/pt-br/servicos/emitir-certidao-de-regularidade-fiscal" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">CND Federal</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                    </div>
+
+                    <!-- CONCESSIONÁRIAS -->
+                    <div class="flex flex-col gap-3">
+                         <h3 class="font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-2 text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary">bolt</span>
+                             Concessionárias
+                        </h3>
+                        <a href="https://www.light.com.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Light (Energia)</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://aguasdorio.com.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Águas do Rio</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                        <a href="https://naturgy.com.br/" target="_blank" class="flex items-center justify-between p-4 bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-transparent rounded-lg hover:border-primary transition-all shadow-sm group">
+                            <span class="text-slate-700 dark:text-slate-200 font-medium group-hover:text-primary transition-colors">Naturgy (Gás)</span>
+                            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_outward</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOVO TAB: LEGISLAÇÃO -->
+            <div id="legislation" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Legislação Essencial (Corretor RJ)</h2>
+
+                <div class="law-section space-y-8">
+
+                    <!-- LEI DO CORRETOR -->
+                    <div>
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-2xl">policy</span> Lei nº 6.530/78 (Regulamentação da Profissão)
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">A espinha dorsal da profissão. Define o que é ser corretor e estabelece as competências e obrigações do Cofen/Creci.</p>
+                        <div class="law-card space-y-2 text-sm">
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">Pontos Chave:</p>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 ml-4">
+                                <li><strong>Atribuições:</strong> A intermediação na compra, venda, permuta e locação de imóveis cabe, privativamente, ao Corretor de Imóveis.</li>
+                                <li><strong>Inscrição:</strong> Exige a inscrição no CRECI (Conselho Regional de Corretores de Imóveis).</li>
+                                <li><strong>Comissão:</strong> Confirma o direito à remuneração (comissão) pelo trabalho de mediação, mesmo que o negócio não se concretize por arrependimento das partes.</li>
+                            </ul>
+                            <a href="https://www.planalto.gov.br/ccivil_03/leis/L6530.htm" target="_blank" class="text-primary text-xs font-semibold hover:underline flex items-center gap-1 mt-2">
+                                Ver Lei na íntegra <span class="material-symbols-outlined text-sm">arrow_outward</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- LEI DO INQUILINATO -->
+                    <div>
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-2xl">home_work</span> Lei nº 8.245/91 (Lei do Inquilinato)
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Regula as locações urbanas (residenciais e não residenciais). Essencial para administradores e corretores de locação.</p>
+                        <div class="law-card space-y-2 text-sm">
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">Pontos Chave:</p>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 ml-4">
+                                <li><strong>Garantias:</strong> Define os tipos de garantia locatícia permitidos (Caução, Fiança, Seguro Fiança e Título de Capitalização).</li>
+                                <li><strong>Prazo:</strong> Estabelece regras para contratos de 30 meses ou mais e para locações por temporada.</li>
+                                <li><strong>Reajuste:</strong> Permite a correção anual do aluguel (geralmente por IGPM ou IPCA).</li>
+                            </ul>
+                             <a href="https://www.planalto.gov.br/ccivil_03/leis/l8245.htm" target="_blank" class="text-primary text-xs font-semibold hover:underline flex items-center gap-1 mt-2">
+                                Ver Lei na íntegra <span class="material-symbols-outlined text-sm">arrow_outward</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- CÓDIGO DE ÉTICA -->
+                     <div>
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-2xl">handshake</span> Código de Ética (Resolução 326/92)
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">As regras de conduta para o corretor, essenciais para evitar processos disciplinares no CRECI.</p>
+                        <div class="law-card space-y-2 text-sm">
+                            <p class="font-semibold text-slate-700 dark:text-slate-200">Pontos Chave:</p>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 ml-4">
+                                <li><strong>Deveres:</strong> Exige lealdade, sigilo, diligência e transparência no trato com os clientes e colegas.</li>
+                                <li><strong>Concorrência:</strong> Proíbe o aliciamento de clientes de colegas e a publicidade enganosa.</li>
+                                <li><strong>Avaliação:</strong> A avaliação de imóveis deve ser feita com rigor e fundamentação, seguindo a Resolução COFECI nº 1.066/07.</li>
+                            </ul>
+                             <a href="https://www.creci-rj.gov.br/arquivos/Resolucao326-92.pdf" target="_blank" class="text-primary text-xs font-semibold hover:underline flex items-center gap-1 mt-2">
+                                Ver Resolução na íntegra (PDF) <span class="material-symbols-outlined text-sm">arrow_outward</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- REFERÊNCIAS ADICIONAIS -->
+                    <div>
+                         <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                             <span class="material-symbols-outlined text-xl">account_balance</span> Outras Referências Legais
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                                <a href="https://www.planalto.gov.br/ccivil_03/leis/2002/L10406.htm" target="_blank" class="hover:text-primary hover:underline transition-colors">Código Civil Brasileiro (Lei nº 10.406/02) - Arts. 722 a 729 (Corretagem)</a>
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                                <a href="https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10931.htm" target="_blank" class="hover:text-primary hover:underline transition-colors">Lei da Alienação Fiduciária (Lei nº 9.514/97)</a>
+                            </li>
+                             <li class="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
+                                <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                                <a href="https://www.planalto.gov.br/ccivil_03/decreto/1990-1994/d099238.htm" target="_blank" class="hover:text-primary hover:underline transition-colors">Decreto nº 99.238/90 (Regulamenta a SPU - Terrenos de Marinha)</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- TAB: CHECKLIST -->
+            <div id="checklist" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Checklist de Documentação</h2>
+
+                <div class="mb-6 flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium mb-2 text-gray-500">Cenário</label>
+                        <div class="relative">
+                            <select id="checklist-scenario" class="w-full p-3 bg-white dark:bg-[#1d252d] border border-gray-300 dark:border-transparent rounded-lg appearance-none">
+                                <option value="venda">Compra e Venda</option>
+                                <option value="locacao">Locação</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400 pointer-events-none">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="flex-1" id="guarantee-wrapper" style="display:none">
+                        <label class="block text-sm font-medium mb-2 text-gray-500">Garantia (Locação)</label>
+                        <div class="relative">
+                            <select id="checklist-guarantee" class="w-full p-3 bg-white dark:bg-[#1d252d] border border-gray-300 dark:border-transparent rounded-lg appearance-none">
+                                <option value="fiador">Fiador</option>
+                                <option value="seguro">Seguro Fiança</option>
+                                <option value="deposito">Depósito Caução</option>
+                            </select>
+                             <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400 pointer-events-none">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-blue-50 dark:bg-primary/10 p-4 rounded-lg border border-blue-100 dark:border-primary/20">
+                    <div class="flex justify-between text-sm font-bold mb-2 text-primary"><span>Progresso</span><span id="progress-text">0%</span></div>
+                    <div class="w-full bg-blue-200 dark:bg-primary/20 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-primary h-2.5 rounded-full transition-all duration-300" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div id="checklist-container" class="space-y-4"></div>
+
+                <div class="mt-6 flex gap-3">
+                    <button id="btn-reset" class="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">Limpar</button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-gray-200 dark:bg-[#283039] text-gray-800 dark:text-white rounded-lg hover:opacity-90 transition-opacity">Imprimir</button>
+                </div>
+            </div>
+
+            <!-- TAB: GLOSSARY -->
+            <div id="glossary" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Glossário Imobiliário</h2>
+                <div class="relative mb-6">
+                    <span class="material-symbols-outlined absolute left-3 top-3 text-gray-400">search</span>
+                    <input type="text" id="glossary-search" placeholder="Buscar termo (ex: RGI, Laudêmio)..." class="w-full p-3 pl-10 bg-white dark:bg-[#1d252d] border border-gray-300 dark:border-transparent rounded-lg focus:ring-2 focus:ring-primary">
+                </div>
+                <!-- Glossary List Container -->
+                <div class="space-y-4" id="glossary-list">
+                    <!-- JS fills this -->
+                </div>
+            </div>
+
+            <!-- NOVO TAB: FUTURO & IDEIAS -->
+            <div id="future" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary text-3xl">rocket_launch</span>
+                    Futuro & Ideias (Sugestões de Recursos)
+                </h2>
+
+                <p class="text-gray-500 dark:text-gray-400 mb-6">Estes são os recursos identificados como próximos passos para tornar o Toolkit ainda mais indispensável para o corretor de imóveis:</p>
+
+                <div class="space-y-6">
+
+                     <!-- 1. MELHORIA TÉCNICA (Modularização JS) -->
+                    <div class="future-card">
+                        <h3 class="text-xl font-bold text-primary mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined">code</span>
+                            Modularização Completa do JavaScript
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm">
+                            Embora o código atual seja funcional, a organização do JavaScript em um arquivo único e extenso pode ser desafiadora para manutenção. A próxima melhoria seria separar a lógica de cada calculadora em módulos JS dedicados.
+                        </p>
+                    </div>
+
+                    <!-- 2. NOVO FUTURO IDEA: Simulador de Custas de Financiamento -->
+                    <div class="future-card">
+                        <h3 class="text-xl font-bold text-primary mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined">request_quote</span>
+                            Simulador de Custos de Financiamento (Total)
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm">
+                            Uma calculadora que detalha os custos extras de um financiamento, incluindo taxa de vistoria (tarifa de avaliação), custo de abertura de crédito, seguro MIP/DFI e outras taxas cobradas pelos agentes financeiros.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB: FORM -->
+             <div id="embedded-form" class="tab-content h-full">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Formulário</h2>
+                <div class="w-full h-[600px] bg-white dark:bg-[#1d252d] rounded-xl overflow-hidden border border-gray-200 dark:border-transparent">
+                    <iframe src="form.html" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- MODAL COMPONENT -->
+<div id="glossary-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    <div class="modal-overlay absolute inset-0" onclick="closeGlossaryModal()"></div>
+    <div class="modal-content relative bg-white dark:bg-[#1d252d] w-full max-w-lg rounded-xl shadow-2xl p-6 m-4 flex flex-col max-h-[90vh]">
+
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-4 border-b border-gray-100 dark:border-gray-700 pb-4">
+            <div>
+                 <span id="modal-tag" class="text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block">Categoria</span>
+                 <h2 id="modal-title" class="text-2xl font-bold text-slate-800 dark:text-white leading-tight">Título do Termo</h2>
+            </div>
+            <button onclick="closeGlossaryModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors p-1">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="overflow-y-auto pr-2 space-y-6 flex-1">
+            <!-- Definição -->
+            <div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">O que é</h4>
+                <p id="modal-desc" class="text-slate-600 dark:text-slate-300 text-base leading-relaxed">Descrição principal aqui.</p>
+            </div>
+
+            <!-- VANTAGENS / DESVANTAGENS (NEW SECTION) -->
+            <div id="modal-pros-cons-section" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Vantagens will be injected here -->
+            </div>
+
+            <!-- Detalhes (Opcional) -->
+            <div id="modal-details-section">
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Saiba Mais</h4>
+                <p id="modal-details" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-primary">
+                    Detalhes técnicos ou curiosidades extras.
+                </p>
+            </div>
+
+            <!-- Exemplo Prático (Opcional) -->
+            <div id="modal-example-section">
+                 <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">lightbulb</span> Exemplo Prático
+                </h4>
+                <p id="modal-example" class="text-slate-600 dark:text-slate-300 text-sm italic">
+                    "Numa situação real, isso acontece quando..."
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+            <button onclick="closeGlossaryModal()" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    // --- 1. THEME TOGGLE (Refatorado para suportar dois botões) ---
+    const themeBtn = document.getElementById('theme-toggle');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+
+    // Nova função para aplicar o tema e atualizar ícones
+    function applyTheme(isDark) {
+        const root = document.documentElement;
+        const iconMain = document.getElementById('theme-icon');
+        const iconMobile = document.getElementById('mobile-theme-icon');
+
+        if (isDark) {
+            root.classList.add('dark');
+            localStorage.theme = 'dark';
+            if (iconMain) iconMain.innerText = 'light_mode';
+            if (iconMobile) iconMobile.innerText = 'light_mode';
+        } else {
+            root.classList.remove('dark');
+            localStorage.theme = 'light';
+            if (iconMain) iconMain.innerText = 'dark_mode';
+            if (iconMobile) iconMobile.innerText = 'dark_mode';
+        }
+    }
+
+    // Função para alternar o tema
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.contains('dark');
+        applyTheme(!isDark);
+    }
+
+    // Configuração inicial do tema
+    const initialDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(initialDark);
+
+    // --- 2. MOBILE MENU & NAVIGATION ---
+
+    function toggleMobileMenu() {
+        // Alterna a visibilidade do menu
+        mobileMenu.classList.toggle('hidden');
+    }
+
+    function switchTab(tabId) {
+        // 1. Fechar menu mobile ao clicar em um link
+        if (!mobileMenu.classList.contains('hidden')) {
+             toggleMobileMenu();
+        }
+
+        // 2. Esconder todas as abas
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+        // 3. Remover estado ativo de todos os botões de navegação (Desktop e Mobile)
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.remove('bg-primary', 'text-white');
+            el.classList.add('text-white/70');
+        });
+        document.querySelectorAll('.nav-item-mobile').forEach(el => {
+            el.classList.remove('bg-primary', 'text-white');
+            el.classList.add('text-white/70');
         });
 
-        const content = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(content);
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'watermarked-images.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // 4. Mostrar aba alvo
+        const target = document.getElementById(tabId);
+        if(target) target.classList.add('active');
 
-        downloadBtn.disabled = false;
-      });
-    </script>
-  </body>
+        // 5. Destacar botão da barra lateral (Desktop)
+        const btn = document.getElementById('btn-' + tabId);
+        if(btn) {
+            btn.classList.remove('text-white/70');
+            btn.classList.add('bg-primary', 'text-white');
+        }
+
+        // 6. Destacar botão da barra lateral (Mobile)
+        const btnMobile = document.getElementById('mobile-btn-' + tabId);
+        if(btnMobile) {
+            btnMobile.classList.remove('text-white/70');
+            btnMobile.classList.add('bg-primary', 'text-white');
+        }
+
+
+        // 7. Atualizar título do cabeçalho
+        const titles = {
+            'mobile-dashboard': 'Dashboard Rápido',
+            'calculators': 'Calculadoras Imobiliárias',
+            'links': 'Links Úteis',
+            'checklist': 'Checklist de Documentação',
+            'glossary': 'Glossário Imobiliário',
+            'embedded-form': 'Formulário',
+            'market': 'Dados de Mercado',
+            'legislation': 'Legislação Essencial',
+            'future': 'Futuro & Ideias'
+        };
+        // O elemento com ID 'page-title' é um <span> dentro do <h1>
+        document.getElementById('page-title').innerText = titles[tabId] || 'Real Estate Toolkit';
+    }
+
+    // --- 3. CALCULATOR NAVIGATION (GRID vs DETAIL) ---
+    function openCalculator(calcId) {
+        // Safe check for elements before accessing classList
+        const grid = document.getElementById('calculator-grid-view');
+        const active = document.getElementById('calculator-active-view');
+
+        if (grid) grid.classList.add('hidden');
+        // Acessa o contêiner de visualização ativa (o que estava faltando/nulo)
+        if (active) active.classList.remove('hidden');
+
+        // Hide all calc containers within the active view
+        document.querySelectorAll('#calculator-active-view .calc-container').forEach(el => el.classList.add('hidden'));
+
+        // Show specific calc
+        const specific = document.querySelector(`[data-calculator="${calcId}"]`);
+        if(specific) specific.classList.remove('hidden');
+
+        // Garante que o cálculo inicial seja executado (para campos com valor padrão)
+        runCalc();
+    }
+
+    function closeCalculator() {
+        const grid = document.getElementById('calculator-grid-view');
+        const active = document.getElementById('calculator-active-view');
+
+        if (active) active.classList.add('hidden');
+        if (grid) grid.classList.remove('hidden');
+    }
+
+    // Search in Grid
+    document.getElementById('calc-search').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.calc-card').forEach(card => {
+            const txt = card.innerText.toLowerCase();
+            card.style.display = txt.includes(term) ? 'flex' : 'none';
+        });
+    });
+
+    // --- 4. CALC LOGIC (Ported) ---
+    const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    const num = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+    const currencyOpts = { mask: 'R$ num', blocks: { num: { mask: Number, scale: 2, thousandsSeparator: '.', radix: ',', mapToRadix: ['.'], padFractionalZeros: true, signed: false } } };
+    const masks = {};
+    let priceChart = null;
+    let sacChart = null;
+
+    function runCalc() {
+        // Only run if a calculator is actually visible
+        const activeContainer = document.querySelector('#calculator-active-view .calc-container:not(.hidden)');
+        if(!activeContainer) return;
+
+        const activeId = activeContainer.getAttribute('data-calculator');
+
+        try {
+            if (activeId === 'calc-cta') calcCTA();
+            if (activeId === 'calc-buy-rent') calcBuyRent();
+            if (activeId === 'calc-price') calcPrice();
+            if (activeId === 'calc-sac') calcSAC();
+            if (activeId === 'calc-laudemio') calcLaudemio();
+            if (activeId === 'calc-rent-adjust') calcRentAdjust();
+            if (activeId === 'calc-invest') calcInvest();
+            if (activeId === 'calc-yield') calcYield();
+            if (activeId === 'calc-area') calcArea();
+            if (activeId === 'calc-commission') calcComm();
+            if (activeId === 'calc-variation') calcVar();
+            if (activeId === 'calc-itbi') calcITBI();
+            if (activeId === 'calc-ppm') calcPPM();
+
+            // NOVAS CALCULADORAS
+            if (activeId === 'calc-appreciation') calcAppreciation();
+            if (activeId === 'calc-occupancy') calcOccupancy();
+            if (activeId === 'calc-capital-gain') calcCapitalGain();
+            if (activeId === 'calc-cartorio') calcCartorio();
+            if (activeId === 'calc-finance-costs') calcFinanceCosts(); // <-- NOVO
+
+        } catch(e) { console.log("Calc incomplete input:", e); }
+    }
+
+    // --- Core Fix: Helper functions updated to handle empty/NaN values gracefully ---
+
+    function getVal(id) {
+        // 1. Check Mask (Monetary fields)
+        if(masks[id]) {
+            // Get the unmasked string (e.g., "150000.00" or "")
+            const val = parseFloat(masks[id].unmaskedValue);
+            // If the string is empty, parseFloat returns NaN. We default to 0.
+            return isNaN(val) ? 0 : val;
+        }
+
+        // 2. Fallback for unmasked inputs
+        const el = document.getElementById(id);
+        if(el) {
+            const val = parseFloat(el.value);
+            return isNaN(val) ? 0 : val;
+        }
+        return 0;
+    }
+
+    function getNum(id) {
+        const el = document.getElementById(id);
+        if(el) {
+            // Parses the value (e.g., percentage, term). Defaults to 0 if empty or invalid.
+            const val = parseFloat(el.value);
+            return isNaN(val) ? 0 : val;
+        }
+        return 0;
+    }
+
+    // --- End Core Fix ---
+
+
+    // ... (All existing Calc functions: calcCTA, calcBuyRent, etc. - Identical logic, but now using robust helpers) ...
+    function calcCTA() { const p = getVal('cta-price'); const itbi = getNum('cta-itbi-rate')/100; const cart = getNum('cta-cartorio-rate')/100; const out = getVal('cta-outras'); if(!p) return; showRes('cta-result', `Total: ${brl.format(p+(p*itbi)+(p*cart)+out)}`, `ITBI: ${brl.format(p*itbi)} | Cartório: ${brl.format(p*cart)} | Outras Despesas: ${brl.format(out)}`, {type: 'Custo de Aquisição', val: p+(p*itbi)+(p*cart)+out}); }
+
+    function calcBuyRent() { const rent = getVal('cbr-rent-val'); const price = getVal('cbr-price'); const down = getVal('cbr-downpayment'); const rate = getNum('cbr-rate')/100/12; const selic = getNum('cbr-selic')/100; if(!rent || !price) return; const loan = price - down; const interest = loan * rate; const opp = down * selic; const total = interest + opp; const diff = rent - total; const color = diff > 0 ? "text-green-600 dark:text-green-400" : "text-blue-600 dark:text-blue-400"; showRes('cbr-result', `<span class="${color}">${diff > 0 ? "Comprar vence" : "Alugar vence"}</span>`, `Custo Aluguel: ${brl.format(rent)} vs Compra: ${brl.format(total)}`, {type: 'Comprar vs Alugar', val: diff > 0 ? 'Comprar' : 'Alugar'}); }
+
+    function calcPrice() { const P = getVal('fin-price'); const E = getVal('fin-down'); const i = (getNum('fin-rate')/100)/12; const n = getNum('fin-term') * 12; if(!P || !n) return; const PV = P - E; const pmt = PV * ((i * Math.pow(1+i,n))/(Math.pow(1+i,n)-1)); showRes('fin-result', `Parcela: ${brl.format(pmt)}`, `Financiado: ${brl.format(PV)}`, {type: 'PRICE', val: pmt}); renderChart('priceChart', PV, i, n, pmt, 'PRICE'); }
+
+    function calcSAC() { const P = getVal('sac-price'); const E = getVal('sac-down'); const i = (getNum('sac-rate')/100)/12; const n = getNum('sac-term') * 12; if(!P || !n) return; const PV = P - E; const amort = PV / n; const first = amort + (PV * i); const last = amort + (amort * i); showRes('sac-result', `1ª: ${brl.format(first)} | Última: ${brl.format(last)}`, `Amortização: ${brl.format(amort)}`, {type: 'SAC', val: first}); renderChart('sacChart', PV, i, n, 0, 'SAC'); }
+
+    function calcLaudemio() { const tot = getVal('laud-total'); const type = parseFloat(document.getElementById('laud-type').value); const land = getVal('laud-land'); const base = land > 0 ? land : tot; if(!base) return; const val = base * (type/100); showRes('laud-result', `Valor: ${brl.format(val)}`, `Base: ${brl.format(base)} (${type}%)`, {type: 'Laudêmio', val: val}); }
+
+    function calcRentAdjust() { const cur = getVal('rent-current'); const idx = getNum('rent-rate'); if(!cur) return; const val = cur * (1 + idx/100); showRes('rent-result', `Novo: ${brl.format(val)}`, `Aumento: ${brl.format(val - cur)}`, {type: 'Reajuste Aluguel', val: val}); }
+
+    function calcInvest() { const amt = getVal('inv-amount'); const rent = getVal('inv-rent'); const yld = getNum('inv-yield')/100; const vac = getNum('inv-vac')/100; if(!amt || !rent) return; const netRent = rent * (1 - vac); const rRet = (netRent/amt)*100; const fRet = amt * yld; showRes('inv-result', `Imóvel: ${num.format(rRet)}% a.m.`, `Liq. Imóvel: ${brl.format(netRent)} vs Aplicação: ${brl.format(fRet)}`, {type: 'Investimento', val: `${num.format(rRet)}%`}); }
+
+    function calcYield() { const p = getVal('yield-price'); const r = getVal('yield-rent'); if(!p) return; const y = (r*12/p)*100; showRes('yield-result', `Anual: ${num.format(y)}%`, `Mensal: ${num.format(y/12)}%`, {type: 'Yield', val: `${num.format(y)}%`}); }
+
+    function calcArea() { const l = getNum('area-len'); const w = getNum('area-wid'); if(!l || !w) return; showRes('area-result', `${num.format(l*w)} m²`, '', {type: 'Área', val: `${l*w} m²`}); }
+
+    // CÁLCULO DE COMISSÃO (Versão atualizada)
+    function calcComm() {
+        const commType = document.getElementById('comm-type').value;
+        const baseValue = getVal('comm-price');
+        const totalPct = getNum('comm-pct') / 100;
+        const brokerPct = getNum('comm-broker-pct') / 100;
+
+        if (!baseValue) return;
+
+        let totalCommission;
+
+        if (commType === 'venda') {
+            // Comissão de Venda: % sobre o valor de venda.
+            totalCommission = baseValue * totalPct;
+
+        } else if (commType === 'locacao') {
+            // Comissão de Locação: Valor do Primeiro Aluguel.
+            // totalCommission é o valor do 1º aluguel (baseValue)
+            totalCommission = baseValue;
+        }
+
+        const brokerShare = totalCommission * brokerPct;
+        const agencyShare = totalCommission - brokerShare;
+        const agencyPct = 100 - (brokerPct * 100); // % da Imobiliária
+
+        let subText;
+        if (commType === 'venda') {
+            subText = `Total Corretagem: ${brl.format(totalCommission)} (${num.format(totalPct*100)}% da venda) | Imobiliária: ${brl.format(agencyShare)} (${num.format(agencyPct)}%)`;
+        } else {
+             // Locação: A base é o 1º aluguel, e dividimos o total (1º aluguel) em corretor/imobiliária.
+             subText = `Base (1º Aluguel): ${brl.format(totalCommission)} | Imobiliária: ${brl.format(agencyShare)} (${num.format(agencyPct)}%)`;
+        }
+
+        showRes('comm-result',
+                `Parte Corretor: ${brl.format(brokerShare)}`,
+                subText,
+                {type: `Comissão (${commType === 'venda' ? 'Venda' : 'Locação'})`, val: brokerShare}
+        );
+    }
+
+    // Função para adaptar os rótulos (Comissão)
+    window.updateCommType = function() {
+        const type = document.getElementById('comm-type').value;
+        const labelPrice = document.getElementById('label-comm-price');
+        const commPctWrapper = document.getElementById('comm-pct-wrapper');
+
+        if (type === 'venda') {
+            labelPrice.innerText = 'Valor Final da Venda';
+            commPctWrapper.innerHTML = `
+                <label class="block mb-1 text-sm text-gray-500">Percentual de Comissão Total (Ex: 6%)</label>
+                <input type="number" id="comm-pct" value="6" class="w-full p-3 bg-gray-50 dark:bg-[#283039] border border-gray-300 dark:border-transparent rounded-lg">
+            `;
+        } else {
+            labelPrice.innerText = 'Valor do Primeiro Aluguel (Base da Comissão)';
+            // Para Locação, a comissão total é fixada no 1º aluguel (baseValue).
+            // O campo comm-pct é escondido ou substituído por um aviso, mas o valor é 100% da base.
+            commPctWrapper.innerHTML = `
+                <p class="text-sm text-gray-500 mb-2 mt-1">
+                    *Para Locação, a comissão total é o valor do 1º aluguel.
+                </p>
+                <input type="hidden" id="comm-pct" value="100">
+            `;
+        }
+
+        // Reaplicar listeners e máscaras para os campos que podem ter mudado (o valor base)
+        const newPriceInput = document.getElementById('comm-price');
+        const newPctInput = document.getElementById('comm-pct');
+
+        if (masks['comm-price']) masks['comm-price'].destroy();
+        masks['comm-price'] = IMask(newPriceInput, currencyOpts);
+        masks['comm-price'].on('accept', runCalc);
+
+        if (newPctInput && newPctInput.type === 'number') {
+            newPctInput.addEventListener('input', runCalc);
+        }
+
+        // Executa o cálculo com os novos rótulos
+        runCalc();
+    }
+
+    // CÁLCULO DE APRECIAÇÃO ANUAL (CAGR)
+    function calcAppreciation() {
+        const initialPrice = getVal('appr-initial-price');
+        const finalPrice = getVal('appr-final-price');
+        const years = getNum('appr-years');
+
+        if (!initialPrice || !finalPrice || years <= 0) return;
+
+        // Formula CAGR: ((Valor Final / Valor Inicial) ^ (1 / Anos)) - 1
+        const rate = (Math.pow(finalPrice / initialPrice, 1 / years) - 1) * 100;
+
+        const totalGain = finalPrice - initialPrice;
+
+        showRes('appr-result',
+                `${num.format(rate)}% a.a.`,
+                `Ganho Total: ${brl.format(totalGain)} | Período: ${years} anos`,
+                {type: 'Apreciação Anual (CAGR)', val: `${num.format(rate)}% a.a.`}
+        );
+    }
+
+    // CUSTO DE OCUPAÇÃO (m²)
+    function calcOccupancy() {
+        const rent = getVal('occ-rent');
+        const condo = getVal('occ-condo');
+        const iptu = getVal('occ-iptu');
+        const area = getNum('occ-area');
+
+        if (!area || area <= 0) return;
+
+        const totalCost = rent + condo + iptu;
+        const costPerM2 = totalCost / area;
+
+        showRes('occ-result',
+                `${brl.format(costPerM2)} / m²`,
+                `Custo Mensal Total: ${brl.format(totalCost)} | Área: ${num.format(area)} m²`,
+                {type: 'Custo de Ocupação', val: costPerM2}
+        );
+    }
+
+    // GANHO DE CAPITAL (IRPF SIMPLIFICADO)
+    function calcCapitalGain() {
+        const saleValue = getVal('cg-sale-value');
+        const acqCost = getVal('cg-acq-cost');
+        const improvements = getVal('cg-improvements');
+
+        if (!saleValue || !acqCost) return;
+
+        // Base de Cálculo: Valor de Venda - (Custo de Aquisição + Benfeitorias)
+        const totalAcquisitionCost = acqCost + improvements;
+        const taxableBase = saleValue - totalAcquisitionCost;
+        const taxRate = 0.15; // Taxa padrão simplificada de 15% (para lucros até R$ 5 milhões)
+
+        if (taxableBase <= 0) {
+            showRes('cg-result',
+                    `Não há Ganho de Capital`,
+                    `Prejuízo ou Custo Total de Aquisição (${brl.format(totalAcquisitionCost)}) >= Valor de Venda.`,
+                    {type: 'Ganho de Capital', val: 0}
+            );
+            return;
+        }
+
+        const estimatedTax = taxableBase * taxRate;
+
+        showRes('cg-result',
+                `Imposto Estimado: ${brl.format(estimatedTax)}`,
+                `Base de Cálculo (Lucro): ${brl.format(taxableBase)} | Alíquota Simplificada: ${num.format(taxRate*100)}%`,
+                {type: 'Ganho de Capital (IRPF)', val: estimatedTax}
+        );
+    }
+
+    // SIMULADOR DETALHADO DE CUSTAS CARTORÁRIAS (EMOLUMENTOS)
+    function calcCartorio() {
+        const V = getVal('cart-price');
+        if (!V) return;
+
+        // --- LÓGICA ILUSTRATIVA DE CUSTAS CARTORÁRIAS (EMOLUMENTOS) ---
+        // NOTA: Estes valores e faixas são ilustrativos e visam simular a progressividade do cálculo real.
+        // Eles NÃO substituem a Tabela de Emolumentos do Tribunal de Justiça do RJ (TJ-RJ).
+
+        // Define as faixas e taxas para Escritura e Registro
+        const bands = [
+            // Faixa 1: até R$ 100.000
+            { limit: 100000, baseE: 1500, rateE: 0.002, baseR: 1200, rateR: 0.002, capE: 1500, capR: 1200 },
+            // Faixa 2: até R$ 300.000
+            { limit: 300000, baseE: 1500, rateE: 0.0015, baseR: 1200, rateR: 0.0015 },
+            // Faixa 3: até R$ 700.000
+            { limit: 700000, baseE: 2000, rateE: 0.0012, baseR: 1700, rateR: 0.0010 },
+            // Faixa 4: até R$ 1.500.000
+            { limit: 1500000, baseE: 3000, rateE: 0.0008, baseR: 2500, rateR: 0.0007 },
+            // Faixa 5: Acima de R$ 1.500.000 (Simulação de teto ou taxa marginal mínima)
+            { limit: Infinity, baseE: 4500, rateE: 0.0002, baseR: 3500, rateR: 0.0001 }
+        ];
+
+        // Função para calcular a taxa de emolumentos por faixa (Progressividade)
+        const calculateEmolument = (value, isRegistro) => {
+            let fee = 0;
+            let remainingValue = value;
+            let prevLimit = 0;
+
+            for (const band of bands) {
+                if (remainingValue <= 0) break;
+
+                const currentLimit = band.limit;
+                const baseFee = isRegistro ? band.baseR : band.baseE;
+                const rate = isRegistro ? band.rateR : band.rateE;
+
+                // Se o valor total for menor que o limite da banda 1, aplica a taxa base (fixa)
+                if (value <= bands[0].limit) {
+                    return isRegistro ? bands[0].capR : bands[0].capE;
+                }
+
+                const marginalCap = currentLimit - prevLimit;
+                const marginalValue = Math.min(remainingValue, marginalCap);
+
+                // Se estamos na primeira banda relevante, usamos a taxa base daquela banda
+                if (prevLimit === 0) {
+                     fee = baseFee;
+                } else {
+                    // Para as faixas seguintes, somamos a taxa marginal
+                    fee += marginalValue * rate;
+                }
+
+                remainingValue -= marginalValue;
+                prevLimit = currentLimit;
+
+                // Parada de segurança/simulação de teto máximo (para valores altíssimos)
+                if (value > 3000000) {
+                     return isRegistro ? 9500 : 12000;
+                }
+            }
+            return fee;
+        };
+
+        const custoEscritura = calculateEmolument(V, false); // Cálculo da Escritura (Tabelionato de Notas)
+        const custoRegistro = calculateEmolument(V, true);   // Cálculo do Registro (RGI)
+
+        const custoTotal = custoEscritura + custoRegistro;
+
+        const subText = `Escritura (Tabelionato de Notas): ${brl.format(custoEscritura)} | Registro (RGI): ${brl.format(custoRegistro)}`;
+
+        showRes('cart-result',
+                `Total Custas: ${brl.format(custoTotal)}`,
+                subText,
+                {type: 'Custas Cartorárias', val: custoTotal}
+        );
+    }
+
+    // NOVO: SIMULADOR DE CUSTOS DE FINANCIAMENTO (TOTAL)
+    function calcFinanceCosts() {
+        const loanAmount = getVal('fin-cost-loan');
+        const termMonths = getNum('fin-cost-term-m');
+        const vistoriaFee = getVal('fin-cost-vistoria');
+        const adminFee = getVal('fin-cost-admin');
+        const mipRate = getNum('fin-cost-mip-rate') / 100;
+        const dfiRate = getNum('fin-cost-dfi-rate') / 100;
+
+        if (!loanAmount || termMonths <= 0) return;
+
+        // CUSTOS INICIAIS (À VISTA)
+        const initialCosts = vistoriaFee + adminFee;
+
+        // CUSTOS RECORRENTES (MENSAIS)
+        // O cálculo do seguro é complexo na vida real (baseado no saldo devedor e idade).
+        // Aqui, faremos uma simplificação didática: percentual anual sobre o valor inicial financiado, dividido por 12.
+
+        // Taxa MIP e DFI somadas, anualmente (sobre o valor financiado inicial)
+        const totalInsuranceRate = mipRate + dfiRate;
+        // Custo total do seguro no primeiro ano (aprox. 12 meses)
+        const yearlyInsuranceCostApprox = loanAmount * totalInsuranceRate;
+        // Custo mensal aproximado de seguro (baseado no 1º ano, varia na prática)
+        const monthlyInsuranceCostApprox = yearlyInsuranceCostApprox / 12;
+
+        // CUSTO TOTAL PROJETADO (apenas para fins de informação)
+        const totalCostEstimate = initialCosts + (monthlyInsuranceCostApprox * termMonths);
+
+        // Display result
+        const subText = `Custos À Vista (Vistoria + Admin.): ${brl.format(initialCosts)} | Custo de Seguro Total (Estimado no Prazo): ${brl.format(totalCostEstimate - initialCosts)}`;
+
+        showRes('fin-cost-result',
+                `Mensal (Seguro Aprox.): ${brl.format(monthlyInsuranceCostApprox)}`,
+                subText,
+                {type: 'Custos Financiamento', val: monthlyInsuranceCostApprox}
+        );
+    }
+
+
+
+    // OLD FUNCTIONS REMAINING...
+    function calcVar() { const o = getVal('var-old'); const n = getVal('var-new'); if(!o) return; const v = ((n-o)/o)*100; const color = v >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; showRes('var-result', `<span class="${color}">${num.format(v)}%</span>`, `Diferença: ${brl.format(n-o)}`, {type: 'Variação', val: `${num.format(v)}%`}); }
+
+    function calcITBI() { const p = getVal('itbi-price'); const r = getNum('itbi-rate')/100; if(!p) return; showRes('itbi-result', `${brl.format(p*r)}`, '', {type: 'ITBI', val: p*r}); }
+
+    function calcPPM() { const p = getVal('ppm-price'); const a = getNum('ppm-area'); if(!p || !a) return; showRes('ppm-result', `${brl.format(p/a)} / m²`, '', {type: 'Preço m²', val: p/a}); }
+
+    // Helpers
+    function showRes(id, main, sub, rawData = null) {
+        const el = document.getElementById(id);
+        if(el) {
+            el.style.display = 'block';
+            let html = `<div class="flex justify-between items-start">
+                          <div>
+                            <span class="result-label block text-xs uppercase tracking-wider text-gray-500 font-bold mb-1">Resultado</span>
+                            <span class="result-big-value">${main}</span>
+                          </div>`;
+
+            // Add Copy Button if rawData exists
+            if(rawData) {
+                 // Escape single quotes in sub to prevent JS error
+                 const safeSub = sub.replace(/'/g, "\\'").replace(/<[^>]*>?/gm, '');
+                 html += `<button onclick="copyResult('${rawData.type}', '${rawData.val}', '${safeSub}')" class="p-2 text-gray-400 hover:text-primary transition-colors" title="Copiar resumo para WhatsApp">
+                            <span class="material-symbols-outlined">content_copy</span>
+                         </button>`;
+            }
+
+            html += `</div>`; // Close flex
+
+            if(sub) {
+                html += `<div class="result-breakdown-container mt-3 pt-3 border-t border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400">${sub}</div>`;
+            }
+            el.innerHTML = html;
+        }
+    }
+
+    // FIX: Function copyResult using document.execCommand('copy') for better compatibility in iframes
+    window.copyResult = function(type, val, sub) {
+        const textToCopy = `*Toolkit Imobiliário RJ* 🏙️\n\n📊 *${type}*\n💰 Resultado: ${typeof val === 'number' ? brl.format(val) : val}\n${sub ? `ℹ️ ${sub}` : ''}\n\n_Gerado em ${new Date().toLocaleDateString()}_`;
+
+        // 1. Create a temporary textarea element
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = textToCopy;
+
+        // 2. Make it invisible and append to body
+        tempTextArea.style.position = 'absolute';
+        tempTextArea.style.left = '-9999px';
+        document.body.appendChild(tempTextArea);
+
+        // 3. Select the text
+        tempTextArea.select();
+
+        let success = false;
+        try {
+            // 4. Execute the copy command (works in most iframe environments)
+            success = document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback: Unable to copy using execCommand:', err);
+        } finally {
+            // 5. Clean up: remove the temporary element
+            document.body.removeChild(tempTextArea);
+        }
+
+        // Simple visual feedback
+        const btn = document.activeElement;
+        if(btn && btn.tagName === 'BUTTON') {
+            const icon = btn.querySelector('span');
+            if(icon) {
+                const original = icon.innerText;
+                if (success) {
+                    icon.innerText = 'check';
+                    icon.classList.add('text-green-500');
+                } else {
+                    icon.innerText = 'error';
+                    icon.classList.add('text-red-500');
+                    console.log("Could not copy. Please copy manually:", textToCopy);
+                }
+
+                setTimeout(() => {
+                    icon.innerText = original;
+                    icon.classList.remove('text-green-500', 'text-red-500');
+                }, 2000);
+            }
+        }
+    }
+    // END FIX
+
+    window.clearCalc = function(id) {
+        const el = document.querySelector(`[data-calculator="${id}"]`);
+        // Limpa campos de input
+        el.querySelectorAll('input').forEach(i => { i.value = ''; if(masks[i.id]) masks[i.id].updateValue(); });
+        // Limpa campos de number que não tem máscara
+        el.querySelectorAll('input[type="number"]').forEach(i => { i.value = i.getAttribute('value') || ''; });
+
+        const res = document.getElementById(id.replace('calc-', '') + '-result');
+        if(res && id !== 'calc-price' && id !== 'calc-sac') res.style.display = 'none';
+
+        // Recalcula para reaparecer resultados padrão
+        runCalc();
+    }
+
+    // Charts
+    function renderChart(canvasId, PV, i, n, pmt, type) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const labels = []; const dataBal = []; let bal = PV;
+        for(let m=0; m<=n; m++) {
+            if(m % 12 === 0) { labels.push(m/12); dataBal.push(bal); }
+            if(m < n) {
+                let interest = bal * i;
+                let amort = type === 'PRICE' ? pmt - interest : PV / n;
+                bal -= amort; if(bal < 0) bal = 0;
+            }
+        }
+        const config = { type: 'line', data: { labels: labels, datasets: [{ label: 'Saldo Devedor', data: dataBal, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true }] }, options: { responsive: true, maintainAspectRatio: false } };
+        if(type === 'PRICE') { if(priceChart) priceChart.destroy(); priceChart = new Chart(ctx, config); }
+        else { if(sacChart) sacChart.destroy(); sacChart = new Chart(ctx, config); }
+    }
+
+    // --- 5. INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Init active tab
+        // Ocultar a tab de links e mostrar a nova tab de Legislação.
+        switchTab('mobile-dashboard');
+
+        // Apply Masks & Listeners
+        // Keywords para campos monetários
+        const monetaryKeywords = ['price','val','rent','down','amount','old','new', 'outras', 'land', 'total', 'condo', 'iptu', 'improvements', 'cost', 'loan', 'vistoria', 'admin'];
+
+        // We select ALL inputs inside calculator containers to ensure nothing is missed
+        const calcInputs = document.querySelectorAll('.calc-container input, .calc-container select');
+
+        calcInputs.forEach(input => {
+            // Check if it's a text input that needs masking (monetary)
+            if(input.type === 'text' && monetaryKeywords.some(k => input.id.includes(k))) {
+                masks[input.id] = IMask(input, currencyOpts);
+                // Listen to 'accept' for masked inputs (safer)
+                masks[input.id].on('accept', runCalc);
+            } else {
+                // For number inputs or selects
+                input.addEventListener('input', runCalc);
+                // Adiciona um listener para a tag select do laudêmio (e outros selects)
+                if (input.tagName === 'SELECT') {
+                    input.addEventListener('change', runCalc);
+                }
+            }
+        });
+
+        // Configuração inicial para a calculadora de comissão
+        const commTypeSelect = document.getElementById('comm-type');
+        if (commTypeSelect) {
+            commTypeSelect.addEventListener('change', updateCommType);
+            // Configura o estado inicial da UI após o DOM ser carregado
+            updateCommType();
+        }
+
+        initChecklist();
+        initGlossary();
+
+        // Attach listener for desktop theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    });
+
+    // --- 6. CHECKLIST ---
+    function initChecklist() {
+        const data = {
+            venda: [
+                { t: "Vendedor (PF)", i: ["RG/CPF ou CNH", "Comprovante Residência", "Certidão Estado Civil", "CND Receita Federal", "CND Trabalhista", "Certidões Distribuidores"] },
+                { t: "Imóvel", i: ["RGI (Ônus Reais - 30 dias)", "IPTU (Certidão Negativa)", "Declaração Condomínio", "Taxa de Incêndio"] },
+                { t: "Comprador", i: ["RG/CPF", "Comprovante Residência", "Comprovante Renda"] }
+            ],
+            locacao: [
+                { t: "Inquilino", i: ["RG/CPF", "Comprovante Renda (3x)", "Residência anterior"] },
+                { t: "Garantia (Se Fiador)", i: ["RG/CPF Fiador", "RGI Imóvel Quitado", "Renda Fiador"] }
+            ]
+        };
+        const cont = document.getElementById('checklist-container');
+        const scen = document.getElementById('checklist-scenario');
+        const guar = document.getElementById('guarantee-wrapper');
+
+        function render() {
+            const s = scen.value;
+            guar.style.display = s === 'locacao' ? 'block' : 'none';
+            cont.innerHTML = '';
+            const items = data[s];
+            let total=0, checked=0;
+
+            // LocalStorage key based on scenario
+            const storageKey = `checklist_${s}`;
+            const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+            items.forEach((grp, gIdx) => {
+                const d = document.createElement('div');
+                d.className = 'bg-white dark:bg-[#1d252d] border border-gray-200 dark:border-border-transparent rounded-lg overflow-hidden';
+                d.innerHTML = `<div class="p-3 bg-gray-50 dark:bg-[#283039] font-bold border-b border-gray-200 dark:border-transparent text-slate-700 dark:text-white">${grp.t}</div>`;
+                grp.i.forEach((it, iIdx) => {
+                    total++;
+                    const uid = `${gIdx}_${iIdx}`;
+                    const isChecked = saved[uid] === true;
+                    if(isChecked) checked++;
+
+                    const row = document.createElement('div');
+                    row.className = 'checklist-item p-3 border-b border-gray-100 dark:border-gray-700 last:border-0 flex items-center gap-3 cursor-pointer transition-colors';
+                    row.innerHTML = `<input type="checkbox" class="checklist-checkbox accent-primary size-5" ${isChecked ? 'checked' : ''}> <div class="checklist-text text-sm text-slate-700 dark:text-slate-300 transition-opacity duration-200">${it}</div>`;
+
+                    row.onclick = (e) => {
+                        if(e.target.type !== 'checkbox') {
+                           const cb = row.querySelector('input');
+                           cb.checked = !cb.checked;
+                        }
+                        const finalState = row.querySelector('input').checked;
+                        saved[uid] = finalState;
+                        localStorage.setItem(storageKey, JSON.stringify(saved));
+                        render();
+                    };
+                    d.appendChild(row);
+                });
+                cont.appendChild(d);
+            });
+
+            const p = Math.round((checked/total)*100) || 0;
+            document.getElementById('progress-bar').style.width = p + '%';
+            document.getElementById('progress-text').innerText = p + '%';
+        }
+        scen.addEventListener('change', render);
+        document.getElementById('btn-reset').onclick = () => { localStorage.removeItem(`checklist_${scen.value}`); render(); };
+        render();
+    }
+
+    // --- 7. GLOSSARY WITH MODAL ---
+
+    // Utility function to remove accents and convert to lowercase for accent-insensitive search
+    function normalizeText(text) {
+        if (!text) return "";
+        // Normalize for diacritics (accents) and remove them (using NFD and regex), then convert to lowercase
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // Helper function to render the list of pros/cons (NEW)
+    function renderProsConsList(list, isPros) {
+        if (!list || list.length === 0) return '';
+
+        const iconClass = isPros ? 'text-green-500' : 'text-red-500';
+        const iconName = isPros ? 'check_circle' : 'cancel';
+        const title = isPros ? '✅ Vantagens' : '❌ Desvantagens';
+
+        const itemsHtml = list.map(item => `
+            <li class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-base ${iconClass} mt-0.5">${iconName}</span>
+                <span class="text-sm">${item}</span>
+            </li>
+        `).join('');
+
+        return `<div class="p-3 bg-gray-50 dark:bg-[#283039] rounded-lg">
+                    <h5 class="font-bold mb-2 text-slate-800 dark:text-white flex items-center gap-2">${title}</h5>
+                    <ul class="space-y-2 text-slate-600 dark:text-slate-300 ml-0 list-none p-0">${itemsHtml}</ul>
+                </div>`;
+    }
+
+
+    const glossaryTerms = [
+        // --- TERMOS DE PROPRIEDADE ---
+        {
+            t: "Matrícula",
+            d: "O 'RG' do imóvel no cartório. Histórico completo da propriedade.",
+            tag: "Jurídico",
+            detalhes: "A Matrícula é o documento mais importante de um imóvel. Ela é aberta no momento do primeiro registro e recebe um número único. Nela são anotados (averbados e registrados) todos os acontecimentos relevantes: quem comprou, quem vendeu, se há dívidas (hipotecas/alienação), se houve construção ou demolição. Sem consultar a matrícula atualizada (Certidão de Ônus Reais), não se deve fechar nenhum negócio.",
+            exemplo: "Ao comprar um apartamento usado, você pede a 'Certidão de Inteiro Teor da Matrícula' para confirmar se quem está vendendo é realmente o dono e se o imóvel não está penhorado por uma dívida trabalhista antiga."
+        },
+        {
+            t: "Averbação",
+            d: "Ato de anotar alterações na matrícula (ex: casamento, obras).",
+            tag: "Jurídico",
+            detalhes: "Averbar significa 'notar' ou 'escrever à margem'. É um ato administrativo do cartório para atualizar a realidade do imóvel ou das pessoas envolvidas. Diferente do 'Registro' (que transfere a propriedade), a averbação apenas informa mudanças.",
+            exemplo: "Se você era solteiro quando comprou o imóvel e depois se casou, precisa 'averbar' seu casamento na matrícula do imóvel. Se você mudou o nome da rua, também é feita uma averbação."
+        },
+        {
+            t: "RGI",
+            d: "Registro Geral de Imóveis. Cartório onde se registra a propriedade.",
+            tag: "Jurídico",
+            detalhes: "O RGI é o órgão (cartório extrajudicial) responsável por manter o arquivo histórico de todos os imóveis de uma determinada região. No Rio de Janeiro, existem vários ofícios de RGI, divididos por bairros. Você só é dono de verdade quando seu nome consta no RGI.",
+            exemplo: "Após assinar a Escritura de Compra e Venda no Cartório de Notas, você deve levar esse papel ao RGI competente para 'registrar' a transferência. Só aí o imóvel passa a ser seu legalmente."
+        },
+        {
+            t: "Escritura Pública",
+            d: "Contrato oficial de compra e venda feito em cartório de notas.",
+            tag: "Jurídico",
+            detalhes: "É o documento jurídico que formaliza a vontade das partes (vendedor e comprador) de realizar o negócio. É obrigatória para imóveis acima de 30 salários mínimos. Ela é feita no Tabelionato de Notas. Atenção: Escritura não transfere propriedade, ela apenas formaliza o acordo. A transferência ocorre no registro da escritura no RGI.",
+            exemplo: "Você vai ao 15º Ofício de Notas com o vendedor, o tabelião lê os termos, confere os documentos e as certidões, e ambos assinam o livro oficial. Isso é a Escritura."
+        },
+        // --- TERMOS DE IMPOSTO/TAXAS ---
+        {
+            t: "ITBI",
+            d: "Imposto municipal (3% RJ) pago na compra de imóvel.",
+            tag: "Imposto",
+            detalhes: "Imposto sobre Transmissão de Bens Imóveis. É um tributo municipal cobrado sempre que há uma transferência onerosa (compra e venda) de um imóvel. No Rio de Janeiro, a alíquota padrão é de 3% sobre o valor de mercado ou valor venal (o que for maior). O pagamento do ITBI é pré-requisito para fazer a escritura.",
+            exemplo: "Na compra de um imóvel de R$ 500.000,00 no Rio, você deverá pagar R$ 15.000,00 de ITBI à Prefeitura antes de assinar a escritura definitiva."
+        },
+        {
+            t: "Laudêmio",
+            d: "Taxa paga em transações de imóveis foreiros (União/Município).",
+            tag: "RJ Específico",
+            detalhes: "Não é um imposto, mas uma receita patrimonial. Incide sobre imóveis localizados em terrenos que pertencem originalmente à União (Terrenos de Marinha) ou à Igreja/Município, mas que concedem o uso a particulares (regime de aforamento). Ao vender o imóvel, o vendedor deve pagar uma taxa (geralmente 2.5% ou 5%) para que a União autorize a transferência.",
+            exemplo: "Ao vender um apartamento em Copacabana (frequentemente terreno de marinha), o vendedor precisa pagar 5% do valor do terreno (e não da construção) para a SPU (Secretaria do Patrimônio da União) e obter o CAT (Certidão de Autorização de Transferência)."
+        },
+        // --- GARANTIAS LOCATÍCIAS (COM INFO DE PAGAMENTO) ---
+        {
+            t: "Fiador",
+            d: "Pessoa que se responsabiliza legalmente pelas obrigações do inquilino (dívidas).",
+            tag: "Garantia Locatícia",
+            detalhes: "É o tipo de garantia mais tradicional. O fiador deve ter um imóvel quitado em seu nome (na mesma cidade ou estado, dependendo do contrato) para servir como garantia de que o aluguel e encargos serão pagos caso o inquilino se torne inadimplente. **Forma de Pagamento:** Custo zero para o inquilino (exceto pela taxa de análise cadastral da imobiliária), ou seja, é uma garantia sem custo direto ao alugar.",
+            exemplo: "Se o inquilino não pagar o aluguel por três meses, o proprietário pode acionar o fiador judicialmente para que ele quite a dívida ou tenha seu bem penhorado.",
+            vanta: ["Custo zero para o locatário (Inquilino)", "Máxima segurança para o locador (Proprietário)"],
+            desv: ["Dificuldade em encontrar um fiador adequado", "Burocracia na análise cadastral", "O imóvel do fiador pode demorar a ser penhorado em caso de ação judicial"]
+        },
+        {
+            t: "Seguro Fiança",
+            d: "Seguro que garante ao proprietário o recebimento do aluguel e encargos em caso de inadimplência.",
+            tag: "Garantia Locatícia",
+            detalhes: "O inquilino contrata e paga anualmente um seguro com uma seguradora. Em caso de não pagamento, o proprietário aciona a seguradora, que quita a dívida e, posteriormente, cobra o valor do inquilino. **Forma de Pagamento:** Pago anualmente (à vista ou parcelado em até 4-6 vezes). O valor não é reembolsável ao final do contrato.",
+            exemplo: "O aluguel é R$ 2.000. O inquilino paga R$ 4.000 (duas vezes o aluguel) à seguradora pelo seguro fiança anual. Se ele deixar de pagar, a seguradora cobre o proprietário.",
+            vanta: ["Proprietário tem certeza do recebimento", "Análise de crédito mais rápida", "Não exige imóvel ou terceiros como garantia"],
+            desv: ["Custo alto para o inquilino (anual e não reembolsável)", "Pode exigir mais documentos que a fiança tradicional"]
+        },
+        {
+            t: "Caução (Depósito)",
+            d: "Depósito em dinheiro (geralmente 3x o aluguel) feito pelo inquilino ao proprietário.",
+            tag: "Garantia Locatícia",
+            detalhes: "O inquilino deposita um valor (máximo de 3 aluguéis, por lei) em uma conta poupança em nome de ambos. O valor é corrigido e devolvido ao inquilino no final do contrato, se não houver débitos. **Forma de Pagamento:** Valor da caução (3x) pago à vista, depositado em poupança.",
+            exemplo: "O inquilino paga o primeiro aluguel de R$ 1.500 e mais R$ 4.500 (3x) como caução. Esse valor fica depositado até o final do contrato.",
+            vanta: ["Simples e rápido de fazer (baixa burocracia)", "Valor corrigido é devolvido ao inquilino no final"],
+            desv: ["Baixa segurança para o proprietário (cobre apenas 3 meses)", "Não cobre custos de ação de despejo", "O inquilino precisa ter o valor à vista"]
+        },
+        {
+            t: "Capitalização",
+            d: "Título de capitalização adquirido pelo inquilino como garantia (valor devolvido no final).",
+            tag: "Garantia Locatícia",
+            detalhes: "O inquilino compra um título de capitalização de um banco, geralmente equivalente a 10 ou 12 vezes o valor do aluguel e encargos. Esse valor fica 'caucionado' e pode ser usado para cobrir inadimplência. Ao final do contrato, o inquilino resgata o valor corrigido se não houver débitos. **Forma de Pagamento:** Valor integral pago à vista (geralmente 10-12x o aluguel).",
+            exemplo: "O inquilino compra um título de R$ 20.000. Se ele for inadimplente, o proprietário resgata o valor necessário do título.",
+            vanta: ["É resgatável pelo inquilino", "Cobre valores maiores que a caução (até 12x)", "Não exige fiador"],
+            desv: ["Alto custo inicial para o inquilino (pago à vista)", "A rentabilidade do título costuma ser baixa"]
+        },
+        {
+            t: "Cartão de Crédito (Garantia)",
+            d: "Garantia feita por meio do limite do cartão, sem precisar do limite total comprometido.",
+            tag: "Garantia Locatícia",
+            detalhes: "Uma forma moderna onde o limite do cartão de crédito do inquilino é usado como 'garantia virtual'. Uma taxa mensal é cobrada pela operadora. **Forma de Pagamento:** Taxa de serviço cobrada mensalmente ou anualmente (parcelado no cartão), não reembolsável.",
+            exemplo: "O inquilino paga uma taxa mensal de R$ 150 para que a operadora de garantia utilize o seu limite (apenas em caso de débito) como segurança para o proprietário.",
+            vanta: ["Rápido e 100% digital", "Não bloqueia o limite integralmente do cartão", "Proprietário tem boa segurança"],
+            desv: ["Inquilino paga taxa de serviço mensal/anual", "Aprovação depende da análise de crédito do inquilino"]
+        },
+        {
+            t: "CredPago / Velo",
+            d: "Plataformas que oferecem serviços de fiança locatícia via cartão de crédito.",
+            tag: "Garantia Locatícia",
+            detalhes: "São empresas de tecnologia (fintechs) que popularizaram o uso do cartão de crédito como forma de fiança. Funcionam como intermediárias, facilitando e agilizando a aprovação do inquilino mediante análise de crédito e cobrança de taxas de serviço. **Forma de Pagamento:** Taxa de serviço anual (parcelada ou à vista) cobrada pela plataforma.",
+            exemplo: "O inquilino usa o serviço da CredPago, que avalia o risco em minutos e aprova a locação, mediante o pagamento de uma taxa de serviço anual ou mensal que substitui a necessidade de fiador ou caução.",
+            vanta: ["Agilidade máxima na aprovação do inquilino", "Processo totalmente online", "Mais inclusivo que o Fiador tradicional"],
+            desv: ["Cobrança de taxas de serviço (pelo uso da plataforma)", "Aprovação depende da análise de crédito da empresa"]
+        },
+        {
+            t: "Aluguel Antecipado",
+            d: "Pagamento de aluguéis futuros, geralmente em locações por temporada.",
+            tag: "Garantia Locatícia",
+            detalhes: "A Lei do Inquilinato só permite a cobrança de aluguéis antecipados em locações para temporada ou quando a locação não possui nenhuma outra garantia locatícia. É um risco para o inquilino, pois o proprietário pode não ser encontrado depois. **Forma de Pagamento:** Pago à vista (geralmente o período total da temporada).",
+            exemplo: "No aluguel de uma casa em Búzios por 3 meses, o proprietário exige o pagamento total dos 3 meses no momento da assinatura do contrato.",
+            vanta: ["Segurança financeira imediata para o locador"],
+            desv: ["Só permitido para locações sem outra garantia ou por temporada", "Risco jurídico se usado em locação residencial padrão (pode anular a garantia)", "Risco para o inquilino"]
+        },
+        {
+            t: "Fiança Empresarial",
+            d: "Garantia prestada por uma empresa especializada (menos comum).",
+            tag: "Garantia Locatícia",
+            detalhes: "Envolve uma empresa que assume o risco do inquilino mediante o pagamento de uma taxa. É similar ao seguro fiança, mas menos regulamentado e pouco utilizado no mercado residencial tradicional. **Forma de Pagamento:** Taxa de serviço anual cobrada pela empresa fiadora (negociável).",
+            exemplo: "Uma startup aluga um escritório e utiliza uma fiança empresarial para garantir o pagamento ao proprietário sem precisar alocar grandes quantias em depósito.",
+            vanta: ["Simples para grandes empresas ou multinacionais", "Substitui a necessidade de fiador no CNPJ"],
+            desv: ["Pouco popular no mercado residencial", "Burocracia de aprovação da empresa fiadora"]
+        },
+        // --- OUTROS TERMOS EXISTENTES ---
+        {
+            t: "Sinal (Arras)",
+            d: "Valor pago antecipadamente para garantir o negócio.",
+            tag: "Financeiro",
+            detalhes: "Valor dado em dinheiro ou bens móveis para firmar a conclusão de um contrato. Se o comprador desistir, ele perde o sinal. Se o vendedor desistir, ele deve devolver o sinal em dobro (Arras Penitenciais). Funciona como uma garantia de seriedade na negociação.",
+            exemplo: "O imóvel custa R$ 800 mil. As partes assinam uma Promessa de Compra e Venda e o comprador paga R$ 80 mil de sinal. O restante será pago na escritura definitiva."
+        },
+        {
+            t: "Fração Ideal",
+            d: "A parte indivisível do terreno que cabe a cada apartamento.",
+            tag: "Condomínio",
+            detalhes: "É o percentual que cada unidade possui do terreno total. Imóveis maiores (coberturas) costumam ter fração ideal maior, pagando condomínio mais caro.",
+            exemplo: "Apartamento 101 tem fração ideal de 0,0250. Isso significa que ele é dono de 2,5% do terreno do prédio."
+        },
+        {
+            t: "Benfeitorias",
+            d: "Obras feitas no imóvel (necessárias, úteis ou voluptuárias).",
+            tag: "Geral",
+            detalhes: "Importante na Lei do Inquilinato. Necessárias (reparo de telhado) são indenizáveis. Úteis (grades) dependem de autorização. Voluptuárias (piscina) geralmente não são indenizáveis.",
+            exemplo: "O inquilino consertou um vazamento grave (necessária), então pode abater do aluguel. Já a instalação de um lustre de cristal (voluptuária) ele leva embora ao sair."
+        },
+        {
+            t: "Permuta",
+            d: "Troca de imóveis como forma de pagamento.",
+            tag: "Negociação",
+            detalhes: "Operação onde se troca um bem por outro. Se os valores forem iguais, não há ganho de capital, logo não há imposto de renda sobre lucro imobiliário (apenas ITBI).",
+            exemplo: "Troco meu apartamento de 2 quartos na Tijuca por uma casa em Jacarepaguá. Se houver torna (dinheiro de volta), paga-se imposto proporcional."
+        },
+        {
+            t: "Alienação Fiduciária",
+            d: "Garantia onde o banco fica com a propriedade até a quitação.",
+            tag: "Financiamento",
+            detalhes: "É o modelo mais comum de financiamento imobiliário hoje. O imóvel fica em nome do banco (propriedade resolúvel) como garantia da dívida. O morador tem a posse direta. Ao quitar a dívida, a propriedade plena volta para o morador. Se não pagar, o banco pode retomar o imóvel rapidamente via leilão extrajudicial, sem processo judicial longo.",
+            exemplo: "Você financiou um imóvel pela Caixa em 30 anos. Na matrícula do imóvel constará que a propriedade pertence à Caixa Econômica Federal, sendo você o fiduciante. Após pagar a última parcela, o banco emite um termo de quitação para você averbar no cartório e 'limpar' o nome do imóvel."
+        },
+        {
+            t: "Habite-se",
+            d: "Certidão da prefeitura atestando que o imóvel é habitável.",
+            tag: "Prefeitura",
+            detalhes: "Documento emitido pela prefeitura após a conclusão de uma obra, atestando que ela foi construída conforme o projeto aprovado e respeitando a legislação local (código de obras). Sem o Habite-se, o imóvel não pode ser registrado no RGI como construção (fica apenas como terreno) e bancos não aceitam financiar.",
+            exemplo: "Uma construtora termina um prédio. Antes de entregar as chaves, ela precisa chamar a fiscalização da prefeitura. Se estiver tudo ok, sai o Habite-se, permitindo a instalação de luz definitiva e a averbação da construção no cartório."
+        },
+         {
+            t: "Certidão Vintenária",
+            d: "Histórico do imóvel nos últimos 20 anos.",
+            tag: "Jurídico",
+            detalhes: "É uma certidão do RGI que mostra toda a cadeia sucessória do imóvel (quem vendeu para quem) no período de 20 anos. O prazo de 20 anos é importante pois é o tempo máximo para prescrição de ações de usucapião e outras disputas de propriedade.",
+            exemplo: "Um advogado pede a Vintenária para garantir que não houve nenhuma fraude ou venda duplicada nas últimas duas décadas que pudesse anular a sua compra atual."
+        },
+        {
+            t: "Ficha Reipersecutória",
+            d: "Certidão que busca ações judiciais reais que atinjam o imóvel.",
+            tag: "Jurídico",
+            detalhes: "Verifica se alguém está processando o vendedor tentando pegar o imóvel de volta (ação real) ou se há dívidas que podem recair sobre o bem.",
+            exemplo: "Antes de pagar o sinal, o advogado pediu a Reipersecutória e descobriu que um irmão do vendedor está contestando a herança desse imóvel."
+        },
+        {
+            t: "SPU",
+            d: "Secretaria do Patrimônio da União (Terrenos de Marinha).",
+            tag: "Órgão Público",
+            detalhes: "Órgão federal que gerencia as terras da União, incluindo os famosos Terrenos de Marinha (faixa litorânea). Emite o RIP (Registro Imobiliário Patrimonial).",
+            exemplo: "Para vender o apartamento na Av. Atlântica, precisei ir ao site da SPU emitir a DARF do Laudêmio e pegar a certidão de autorização."
+        },
+        {
+            t: "Carta de Crédito",
+            d: "Documento do banco garantindo crédito aprovado para compra.",
+            tag: "Financiamento",
+            detalhes: "É o 'cheque' do banco. Após aprovar sua renda, o banco emite essa carta dizendo que você tem X valor aprovado para comprar um imóvel. Tem validade definida.",
+            exemplo: "Com a carta de crédito do Itaú em mãos, pude fazer uma oferta firme no apartamento, garantindo ao vendedor que o pagamento sairia rápido."
+        }
+    ];
+
+    function initGlossary() {
+        const div = document.getElementById('glossary-list');
+        const search = document.getElementById('glossary-search');
+
+        const tagColors = {
+            "Jurídico": "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200",
+            "Imposto": "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
+            "RJ Específico": "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
+            "Financeiro": "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200",
+            "Geral": "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
+            "Prefeitura": "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200",
+            "Financiamento": "bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200",
+            "Condomínio": "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200",
+            "Negociação": "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200",
+            "Órgão Público": "bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200",
+            "Garantia Locatícia": "bg-lime-100 dark:bg-lime-900 text-lime-800 dark:text-lime-200"
+        };
+
+        function renderG(filter="") {
+            div.innerHTML = "";
+
+            // 1. Normalize the search filter once
+            const normalizedFilter = normalizeText(filter);
+
+            glossaryTerms.forEach((item, index) => {
+                // 2. Combine all searchable fields
+                const rawSearchString = `${item.t} ${item.d} ${item.detalhes || ''} ${item.tag}`;
+                // 3. Normalize the search string
+                const normalizedSearchString = normalizeText(rawSearchString);
+
+                // 4. Check for inclusion using normalized strings
+                if(normalizedSearchString.includes(normalizedFilter)) {
+                    const tagClass = tagColors[item.tag] || tagColors["Geral"];
+                    div.innerHTML += `
+                        <div onclick="openGlossaryModal(${index})" class="p-5 bg-white dark:bg-[#1d252d] rounded-xl border border-gray-200 dark:border-transparent shadow-sm hover:border-primary transition-all cursor-pointer group hover:shadow-md">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-slate-800 dark:text-white group-hover:text-primary transition-colors">${item.t}</h3>
+                                <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${tagClass}">${item.tag}</span>
+                            </div>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">${item.d}</p>
+                            <div class="flex items-center gap-1 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span>Ver detalhes</span>
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+        // Pass the raw value, letting renderG handle normalization
+        search.addEventListener('input', (e) => renderG(e.target.value));
+        renderG();
+    }
+
+    // Modal Functions
+    function openGlossaryModal(index) {
+        const item = glossaryTerms[index];
+        const modal = document.getElementById('glossary-modal');
+        const prosConsSection = document.getElementById('modal-pros-cons-section');
+
+        // Populate Data
+        document.getElementById('modal-title').innerText = item.t;
+        document.getElementById('modal-tag').innerText = item.tag;
+        document.getElementById('modal-desc').innerText = item.d;
+
+        // Colors for Tag in Modal
+        const tagColors = {
+            "Jurídico": "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200",
+            "Imposto": "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
+            "RJ Específico": "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
+            "Financeiro": "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200",
+            "Geral": "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
+            "Prefeitura": "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200",
+            "Financiamento": "bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200",
+            "Condomínio": "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200",
+            "Negociação": "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200",
+            "Órgão Público": "bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200",
+            "Garantia Locatícia": "bg-lime-100 dark:bg-lime-900 text-lime-800 dark:text-lime-200"
+        };
+        document.getElementById('modal-tag').className = `text-xs px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block ${tagColors[item.tag] || tagColors["Geral"]}`;
+
+        // Vantagens e Desvantagens (NEW)
+        const vantaHtml = renderProsConsList(item.vanta, true);
+        const desvHtml = renderProsConsList(item.desv, false);
+
+        if (vantaHtml || desvHtml) {
+            prosConsSection.innerHTML = vantaHtml + desvHtml;
+            prosConsSection.style.display = 'grid';
+        } else {
+            prosConsSection.innerHTML = '';
+            prosConsSection.style.display = 'none';
+        }
+
+
+        // Optional Sections (Detalhes)
+        const detailSec = document.getElementById('modal-details-section');
+        if (item.detalhes) {
+            detailSec.style.display = 'block';
+            document.getElementById('modal-details').innerText = item.detalhes;
+        } else {
+            detailSec.style.display = 'none';
+        }
+
+        // Optional Sections (Exemplo)
+        const exSec = document.getElementById('modal-example-section');
+        if (item.exemplo) {
+            exSec.style.display = 'block';
+            document.getElementById('modal-example').innerText = `"${item.exemplo}"`;
+        } else {
+            exSec.style.display = 'none';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeGlossaryModal() {
+        document.getElementById('glossary-modal').classList.add('hidden');
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if(e.key === "Escape") closeGlossaryModal();
+    });
+</script>
+</body>
 </html>

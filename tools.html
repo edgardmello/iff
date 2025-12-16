@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Estate Toolkit - Rio de Janeiro</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load IMask.js -->
+    <script src="https://unpkg.com/imask"></script>
+    <!-- Load Inter font (Tailwind default) -->
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      /* Basic transition for tab content */
+      .tab-content {
+        display: none;
+        transition: opacity 0.3s ease-in-out;
+      }
+      .tab-content.active {
+        display: block;
+        opacity: 1;
+      }
+
+      /* Style for new tabs */
+      .tab-btn {
+        transition: all 0.2s ease-in-out;
+      }
+
+      .tab-btn.active {
+        border-color: #2563eb; /* border-blue-600 */
+        color: #2563eb; /* text-blue-600 */
+        font-weight: 600; /* semibold */
+      }
+
+      .tab-btn:not(.active) {
+        border-color: transparent;
+        color: #6b7280; /* text-gray-500 */
+      }
+
+      .tab-btn:not(.active):hover {
+        background-color: #f9fafb; /* hover:bg-gray-50 */
+        color: #1f2937; /* hover:text-gray-800 */
+      }
+
+      /* Styles for Glossary */
+      #glossary dt {
+        font-weight: 600;
+        color: #1f2937; /* text-gray-800 */
+        margin-top: 0.75rem; /* mt-3 */
+      }
+      #glossary dd {
+        margin-left: 1.5rem; /* ml-6 */
+        color: #4b5563; /* text-gray-600 */
+        border-left: 2px solid #e5e7eb; /* border-l-2 border-gray-200 */
+        padding-left: 0.75rem; /* pl-3 */
+        font-size: 0.9rem;
+      }
+
+      /* Styles for Checklist */
+      #checklist ul {
+        list-style-type: disc;
+        padding-left: 2rem;
+        margin-top: 0.5rem;
+      }
+      #checklist li {
+        margin-bottom: 0.25rem;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-4 md:p-8">
+    <div
+      class="max-w-5xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden"
+    >
+      <!-- Header -->
+      <header class="bg-blue-800 p-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-white text-center">
+          Real Estate Toolkit
+        </h1>
+        <p class="text-center text-blue-200 text-sm md:text-base mt-1">
+          Ferramentas e links úteis para o mercado imobiliário (Rio de Janeiro)
+        </p>
+      </header>
+
+      <!-- Tab Buttons (NOW 4 TABS) -->
+      <nav class="flex flex-wrap sm:flex-nowrap border-b border-gray-200">
+        <button
+          class="tab-btn active w-1/2 sm:w-auto sm:flex-1 py-4 px-2 text-center font-semibold text-sm md:text-base focus:outline-none border-b-2"
+          data-target="calculators"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 inline-block -mt-1 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 00-1 1v1a1 1 0 001 1h6a1 1 0 001-1V5a1 1 0 00-1-1H7zM6 9a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Calculadoras
+        </button>
+        <button
+          class="tab-btn w-1/2 sm:w-auto sm:flex-1 py-4 px-2 text-center font-semibold text-sm md:text-base focus:outline-none border-b-2"
+          data-target="links"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 inline-block -mt-1 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M11 3a1 1 0 100 2h2.586l-6-293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"
+            />
+            <path
+              d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"
+            />
+          </svg>
+          Links Úteis
+        </button>
+        <button
+          class="tab-btn w-1/2 sm:w-auto sm:flex-1 py-4 px-2 text-center font-semibold text-sm md:text-base focus:outline-none border-b-2"
+          data-target="checklist"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 inline-block -mt-1 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Checklist
+        </button>
+        <button
+          class="tab-btn w-1/2 sm:w-auto sm:flex-1 py-4 px-2 text-center font-semibold text-sm md:text-base focus:outline-none border-b-2"
+          data-target="glossary"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 inline-block -mt-1 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2H9V9z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Glossário
+        </button>
+      </nav>
+
+      <!-- Tab Content -->
+      <main class="p-6 md:p-8">
+        <!-- Calculators Content -->
+        <div id="calculators" class="tab-content active">
+          <!-- REMOVED: Grid container -->
+          <!-- <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"> -->
+
+          <!-- NEW: Calculator Selector -->
+          <div class="mb-6">
+            <label
+              for="calculator-select"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >Selecione uma calculadora:</label
+            >
+            <select
+              id="calculator-select"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-lg font-semibold"
+            >
+              <option value="calc-cta">1. Custo Total de Aquisição</option>
+              <option value="calc-price">
+                2. Financiamento (Tabela PRICE)
+              </option>
+              <option value="calc-sac">3. Financiamento (Tabela SAC)</option>
+              <option value="calc-area">4. Área (m²)</option>
+              <option value="calc-commission">5. Comissão</option>
+              <option value="calc-variation">6. Variação de Preço (%)</option>
+              <option value="calc-itbi">7. ITBI</option>
+              <option value="calc-ppm">8. Preço por m²</option>
+              <option value="calc-yield">9. Rentabilidade (Aluguel)</option>
+            </select>
+          </div>
+
+          <!-- NEW: Calculator Display Area -->
+          <div id="calculator-display-area">
+            <!-- Card 1: Custo Total de Aquisição (NEW) - FIXED -->
+            <div
+              data-calculator="calc-cta"
+              class="bg-blue-50 p-6 rounded-lg border border-blue-200 xl:col-span-1"
+            >
+              <h2 class="text-xl font-semibold text-blue-800 mb-4">
+                Custo Total de Aquisição
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="cta-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="cta-price"
+                    placeholder="R$ 500.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="cta-itbi-rate"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >ITBI (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="cta-itbi-rate"
+                      placeholder="3"
+                      value="3"
+                      class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="cta-cartorio-rate"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Cartório (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="cta-cartorio-rate"
+                      placeholder="1.5"
+                      value="1.5"
+                      class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label
+                    for="cta-outras"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Outras Despesas (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="cta-outras"
+                    placeholder="R$ 1.000,00"
+                    value="R$ 0,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div
+                  id="cta-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+            <!-- End of Card 1 -->
+
+            <!-- Card 2: Financing Calculator (PRICE) -->
+            <div
+              data-calculator="calc-price"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200 xl:col-span-1"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Financiamento (Tabela PRICE)
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    for="fin-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="fin-price"
+                    placeholder="R$ 700.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="fin-downpayment"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor da Entrada (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="fin-downpayment"
+                    placeholder="R$ 140.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="fin-rate"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Juros Anuais (%)</label
+                  >
+                  <input
+                    type="number"
+                    id="fin-rate"
+                    placeholder="9.5"
+                    value="9.5"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="fin-term"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Prazo (Anos)</label
+                  >
+                  <input
+                    type="number"
+                    id="fin-term"
+                    placeholder="30"
+                    value="30"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div
+                id="fin-result"
+                class="mt-4 text-lg font-bold p-3 bg-white rounded-md text-center border border-gray-200"
+                style="display: none"
+              ></div>
+            </div>
+
+            <!-- Card 3: Financing Calculator (SAC) (NEW) -->
+            <div
+              data-calculator="calc-sac"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200 xl:col-span-1"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Financiamento (Tabela SAC)
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    for="sac-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="sac-price"
+                    placeholder="R$ 700.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="sac-downpayment"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor da Entrada (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="sac-downpayment"
+                    placeholder="R$ 140.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="sac-rate"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Juros Anuais (%)</label
+                  >
+                  <input
+                    type="number"
+                    id="sac-rate"
+                    placeholder="9.5"
+                    value="9.5"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="sac-term"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Prazo (Anos)</label
+                  >
+                  <input
+                    type="number"
+                    id="sac-term"
+                    placeholder="30"
+                    value="30"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div
+                id="sac-result"
+                class="mt-4 text-lg font-bold p-3 bg-white rounded-md text-center border border-gray-200"
+                style="display: none"
+              ></div>
+            </div>
+
+            <!-- Card 4: Area Calculator -->
+            <div
+              data-calculator="calc-area"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de Área (m²)
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="area-length"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Comprimento (m)</label
+                  >
+                  <input
+                    type="number"
+                    id="area-length"
+                    placeholder="Ex: 10.5"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="area-width"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Largura (m)</label
+                  >
+                  <input
+                    type="number"
+                    id="area-width"
+                    placeholder="Ex: 8"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div
+                  id="area-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md text-center border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Card 5: Commission Calculator -->
+            <div
+              data-calculator="calc-commission"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de Comissão
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="comm-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="comm-price"
+                    placeholder="R$ 500.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <!-- Grid for percentages -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="comm-percent"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Comissão Total (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="comm-percent"
+                      placeholder="Ex: 6"
+                      value="6"
+                      class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="comm-broker-percent"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                      >Corretor (% da comissão)</label
+                    >
+                    <input
+                      type="number"
+                      id="comm-broker-percent"
+                      placeholder="Ex: 20"
+                      value="20"
+                      class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <!-- Note: I removed text-center from the original comm-result div -->
+                <div
+                  id="comm-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Card 6: Price Change Calculator -->
+            <div
+              data-calculator="calc-variation"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de Variação de Preço (%)
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    for="price-old"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Preço Original (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="price-old"
+                    placeholder="R$ 450.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="price-new"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Preço Novo (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="price-new"
+                    placeholder="R$ 475.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div
+                id="change-result"
+                class="mt-4 text-lg font-bold p-3 bg-white rounded-md text-center border border-gray-200"
+                style="display: none"
+              ></div>
+            </div>
+
+            <!-- Card 7: ITBI Calculator -->
+            <div
+              data-calculator="calc-itbi"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de ITBI (Rio de Janeiro)
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="itbi-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor de Transação (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="itbi-price"
+                    placeholder="R$ 500.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="itbi-rate"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Alíquota (%)</label
+                  >
+                  <input
+                    type="number"
+                    id="itbi-rate"
+                    placeholder="3"
+                    value="3"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div
+                  id="itbi-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md text-center border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Card 8: Price per m² -->
+            <div
+              data-calculator="calc-ppm"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de Preço por m²
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="ppm-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="ppm-price"
+                    placeholder="R$ 600.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="ppm-area"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Área Total (m²)</label
+                  >
+                  <input
+                    type="number"
+                    id="ppm-area"
+                    placeholder="Ex: 70"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div
+                  id="ppm-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md text-center border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Card 9: Rental Yield -->
+            <div
+              data-calculator="calc-yield"
+              class="bg-gray-50 p-6 rounded-lg border border-gray-200"
+              style="display: none"
+            >
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                Calculadora de Rentabilidade (Aluguel)
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="yield-price"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Valor do Imóvel (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="yield-price"
+                    placeholder="R$ 400.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="yield-rent"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Aluguel Mensal (R$)</label
+                  >
+                  <input
+                    type="text"
+                    id="yield-rent"
+                    placeholder="R$ 2.000,00"
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div
+                  id="yield-result"
+                  class="mt-4 text-lg font-bold text-gray-900 p-3 bg-white rounded-md text-center border border-gray-200"
+                  style="display: none"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <!-- </div> -->
+          <!-- REMOVED: Closing grid tag -->
+        </div>
+
+        <!-- Links Content (UPDATED) -->
+        <div id="links" class="tab-content">
+          <div class="space-y-6">
+            <!-- Section: Prefeitura & Impostos -->
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Prefeitura & Impostos (RJ)
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a
+                  href="https://carioca.rio/servicos/itbi-simulacao-de-valor-e-pedido-de-guia/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span>Simulação e Guia de ITBI</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://carioca.rio/servicos/consultar-debitos-de-iptu/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H7a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                  <span>Consulta de Débitos (IPTU)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://fazenda.prefeitura.rio/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5h1v5h-1z"
+                    />
+                  </svg>
+                  <span>Secretaria de Fazenda (SMF)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Section: Cartórios & Documentação -->
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Cartórios & Documentação
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a
+                  href="https://www.cartorio24horas.com.br/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Cartório 24 Horas (Certidões)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://www.registrodeimoveis.org.br/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                    />
+                  </svg>
+                  <span>Central de Registro de Imóveis</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Section: Concessionárias (NEW) -->
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Concessionárias (Troca de Titularidade)
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a
+                  href="https://www.light.com.br/para-sua-casa/servicos/troca-de-titularidade"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  <span>Light (Energia)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://aguadorio.com.br/servicos-para-voce/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19.5 16.125c0-1.8-1.5-3.375-3.375-3.375s-3.375 1.5-3.375 3.375c0 1.8 1.5 3.375 3.375 3.375s3.375-1.5 3.375-3.375zm0 0c0-.125-.063-.25-.125-.375M16.125 19.5c0 .125.063.25.125.375m0 0c.063-.125.125-.25.125-.375m-3.375 3.375c1.8 0 3.375-1.5 3.375-3.375s-1.5-3.375-3.375-3.375-3.375 1.5-3.375 3.375 1.5 3.375 3.375 3.375zm0 0c.125 0 .25-.063.375-.125M4.5 16.125c0-1.8 1.5-3.375 3.375-3.375s3.375 1.5 3.375 3.375c0 1.8-1.5 3.375-3.375 3.375S4.5 17.925 4.5 16.125zm0 0c0-.125.063-.25.125-.375M7.875 19.5c0 .125-.063.25-.125.375m0 0c-.063-.125-.125-.25-.125-.375m3.375 3.375c-1.8 0-3.375-1.5-3.375-3.375s1.5-3.375 3.375-3.375 3.375 1.5 3.375 3.375-1.5 3.375-3.375 3.375zm0 0c-.125 0-.25-.063-.375-.125m-3.375-3.375c0 1.8 1.5 3.375 3.375 3.375s3.375-1.5 3.375-3.375-1.5-3.375-3.375-3.375-3.375 1.5-3.375 3.375zM12 3.375c-1.8 0-3.375 1.5-3.375 3.375s1.5 3.375 3.375 3.375 3.375-1.5 3.375-3.375S13.8 3.375 12 3.375zm0 0c-.125 0-.25.063-.375.125m3.375 3.375c0 .125-.063.25-.125.375m0 0c.063-.125.125-.25.125-.375m-3.375 3.375c1.8 0 3.375-1.5 3.375-3.375s-1.5-3.375-3.375-3.375-3.375 1.5-3.375 3.375 1.5 3.375 3.375 3.375zm0 0c.125 0 .25-.063.375-.125"
+                    />
+                  </svg>
+                  <span>Águas do Rio (Água/Esgoto)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Section: Órgãos Reguladores -->
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Órgãos Reguladores
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a
+                  href="https://www.creci-rj.gov.br/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                  <span>CRECI-RJ</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://www.secovirio.com.br/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                    />
+                  </svg>
+                  <span>SECOVI-Rio (Sindicato)</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Section: Principais Portais -->
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Principais Portais de Anúncio
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a
+                  href="https://www.zapimoveis.com.br/venda/imoveis/rj+rio-de-janeiro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Zap Imóveis</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+                <a
+                  href="https://www.vivareal.com.br/venda/rj/rio-de-janeiro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-card"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Viva Real</span>
+                  <span class="link-arrow">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist Content (NEW) -->
+        <div id="checklist" class="tab-content">
+          <div class="space-y-6 text-gray-700">
+            <div>
+              <h2
+                class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2"
+              >
+                Checklist de Documentos para Venda
+              </h2>
+
+              <h3 class="text-lg font-semibold text-gray-700 mt-4 mb-2">
+                Documentos do Vendedor (Pessoa Física)
+              </h3>
+              <ul>
+                <li>Cópia do RG e CPF (e do cônjuge, se aplicável)</li>
+                <li>Certidão de Estado Civil (Nascimento ou Casamento)</li>
+                <li>Comprovante de Residência</li>
+                <li>Certidão Negativa de Débitos da Receita Federal</li>
+                <li>Certidão Negativa da Justiça do Trabalho</li>
+                <li>Certidão Negativa da Justiça Federal</li>
+                <li>Certidão Negativa dos Cartórios de Protesto</li>
+              </ul>
+
+              <h3 class="text-lg font-semibold text-gray-700 mt-6 mb-2">
+                Documentos do Comprador (Pessoa Física)
+              </h3>
+              <ul>
+                <li>Cópia do RG e CPF (e do cônjuge, se aplicável)</li>
+                <li>Certidão de Estado Civil (Nascimento ou Casamento)</li>
+                <li>Comprovante de Residência</li>
+                <li>Comprovação de Renda (necessário para financiamento)</li>
+              </ul>
+
+              <h3 class="text-lg font-semibold text-gray-700 mt-6 mb-2">
+                Documentos do Imóvel
+              </h3>
+              <ul>
+                <li>
+                  Matrícula do Imóvel atualizada (Certidão de Ônus Reais) -
+                  Validade de 30 dias
+                </li>
+                <li>Certidão Negativa de Débitos de IPTU (CND IPTU)</li>
+                <li>
+                  Declaração de Quitação de Débitos Condominiais (se aplicável)
+                </li>
+                <li>Planta Baixa (preferencialmente)</li>
+                <li>Cópia do Título de Aquisição (Escritura ou Contrato)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Glossary Content (NEW) -->
+        <div id="glossary" class="tab-content">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+            Glossário de Termos Imobiliários
+          </h2>
+          <dl>
+            <dt>Alienação Fiduciária</dt>
+            <dd>
+              Modalidade de garantia onde o devedor (comprador) transfere a
+              propriedade do imóvel ao credor (banco) até que a dívida do
+              financiamento seja totalmente quitada.
+            </dd>
+
+            <dt>Escritura Pública</dt>
+            <dd>
+              Documento formal, lavrado em Cartório de Notas, que oficializa a
+              transação de compra e venda. É o que dá direito a registrar o
+              imóvel no nome do novo dono.
+            </dd>
+
+            <dt>ITBI (Imposto sobre Transmissão de Bens Imóveis)</dt>
+            <dd>
+              Imposto municipal pago pelo comprador para oficializar a
+              transferência de propriedade. No Rio de Janeiro, a alíquota padrão
+              é de 3%.
+            </dd>
+
+            <dt>Laudêmio</dt>
+            <dd>
+              Taxa paga ao governo federal (União) em transações de imóveis
+              localizados em "Terreno de Marinha" (áreas próximas ao litoral,
+              rios e lagoas navegáveis). Corresponde a 5% do valor do terreno.
+            </dd>
+
+            <dt>Matrícula do Imóvel</dt>
+            <dd>
+              Considerado o "RG" do imóvel. É o documento oficial, mantido no
+              Cartório de Registro de Imóveis (RGI), que contém todo o
+              histórico: quem foram os donos, metragens, se há dívidas, penhoras
+              ou financiamentos (ônus).
+            </dd>
+
+            <dt>Ônus Reais (Certidão de)</dt>
+            <dd>
+              Documento emitido pelo RGI que informa se existe algum "ônus"
+              (dívida ou restrição) sobre o imóvel, como hipoteca, penhora ou
+              alienação fiduciária. É essencial para uma compra segura.
+            </dd>
+
+            <dt>Tabela PRICE</dt>
+            <dd>
+              Sistema de amortização de financiamento onde as parcelas são fixas
+              (ou corrigidas pela TR). Os juros são maiores no início e a
+              amortização do saldo devedor é mais lenta.
+            </dd>
+
+            <dt>Tabela SAC (Sistema de Amortização Constante)</dt>
+            <dd>
+              Sistema de amortização onde o valor da amortização (valor
+              principal da dívida) é fixo. Como os juros são calculados sobre o
+              saldo devedor, as parcelas diminuem ao longo do tempo. É o mais
+              usado pela Caixa.
+            </dd>
+
+            <dt>VGV (Valor Geral de Vendas)</dt>
+            <dd>
+              Termo usado em lançamentos. É a soma do valor de todas as unidades
+              de um empreendimento, usado para medir o potencial de receita do
+              projeto.
+            </dd>
+          </dl>
+        </div>
+      </main>
+    </div>
+
+    <!-- Custom CSS for Link Cards -->
+    <style>
+      .link-card {
+          display: flex;
+          align-items: center;
+          padding: 0.75rem 1rem; /* p-3/4 */
+          background-color: #f9fafb; /* bg-gray-50 */
+          border-radius: 0.5rem; /* rounded-lg */
+          border: 1px solid #e5e7eb; /* border-gray-200 */
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+          transition: all 0.2s ease-in-out;
+          text-decoration: none;
+          color: #374151; /* text-gray-700 */
+      }
+      .link-card:hover {
+          background-color: #f3f4f6; /* hover:bg-gray-100 */
+          border-color: #d1d5db; /* hover:border-gray-300 */
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow */
+      }
+      .link-card span {
+          margin-left: 0.75rem; /* ml-3 */
+          font-weight: 500; /* font-medium */
+          color: #1d4ed8; /* text-blue-700 */
+      }
+      .link-card .link-arrow {
+          margin-left: auto;
+          color: #9ca3af; /* text-gray-400 */
+          font-weight: bold;
+          transition: transform 0.2s ease-in-out;
+      }
+      .link-card:hover .link-arrow {
+          transform: translateX(4px);
+      }
+
+      /* Style for CTA result */
+      #cta-result .cta-breakdown {
+          font-size: 0.8rem;
+          font-weight: normal;
+          color: #4b5563; /* text-gray-600 */
+          text-align: left;
+          margin-top: 0.5rem;
+          border-top: 1px dashed #d1d5db;
+       #sac-result .sac-breakdown span {
+          color: #1f2937; /* text-gray-800 */
+      }
+
+      /* Style for Commission result breakdown (NEW) */
+      #comm-result .comm-breakdown {
+          font-size: 0.8rem;
+          font-weight: normal;
+          color: #4b5563; /* text-gray-600 */
+          text-align: left;
+          margin-top: 0.5rem;
+          border-top: 1px dashed #d1d5db;
+          padding-top: 0.5rem;
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap-x-2;
+      }
+      #comm-result .comm-label {
+          text-align: right;
+      }
+       #comm-result .comm-value {
+          text-align: left;
+          font-weight: 500;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // --- Tab Functionality (Restored) ---
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const targetId = button.dataset.target;
+
+            // Update buttons
+            tabButtons.forEach((btn) => {
+              btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Update content
+            tabContents.forEach((content) => {
+              if (content.id === targetId) {
+                content.classList.add('active');
+              } else {
+                content.classList.remove('active');
+              }
+            });
+          });
+        });
+
+        // --- Formatters (Restored) ---
+        const brlFormatter = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        });
+
+        const numFormatter = new Intl.NumberFormat('pt-BR', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+
+        // --- Mask Options (Restored) ---
+        const currencyMaskOptions = {
+          mask: 'R$ num',
+          blocks: {
+            num: {
+              mask: Number,
+              scale: 2, // 2 casas decimais
+              thousandsSeparator: '.',
+              radix: ',',
+              mapToRadix: [','],
+              padFractionalZeros: true, // Força '00'
+              signed: false, // Sem números negativos
+            },
+          },
+        };
+
+        // Store mask instances to get unmaskedValue later
+        const inputMasks = {};
+
+        // --- Load values from Local Storage (NEW) ---
+        function loadFromStorage() {
+          if (localStorage.getItem('defaultCommPercent')) {
+            document.getElementById('comm-percent').value =
+              localStorage.getItem('defaultCommPercent');
+          }
+          if (localStorage.getItem('defaultFinRate')) {
+            document.getElementById('fin-rate').value =
+              localStorage.getItem('defaultFinRate');
+            document.getElementById('sac-rate').value =
+              localStorage.getItem('defaultFinRate');
+          }
+          if (localStorage.getItem('defaultItbiRate')) {
+            document.getElementById('itbi-rate').value =
+              localStorage.getItem('defaultItbiRate');
+            document.getElementById('cta-itbi-rate').value =
+              localStorage.getItem('defaultItbiRate');
+          }
+          if (localStorage.getItem('defaultCartorioRate')) {
+            document.getElementById('cta-cartorio-rate').value =
+              localStorage.getItem('defaultCartorioRate');
+          }
+        }
+        loadFromStorage();
+
+        // --- Calculator: Area (Restored) ---
+        const areaLength = document.getElementById('area-length');
+        const areaWidth = document.getElementById('area-width');
+        const areaResult = document.getElementById('area-result');
+
+        function updateArea() {
+          const length = parseFloat(areaLength.value);
+          const width = parseFloat(areaWidth.value);
+
+          if (isNaN(length) || isNaN(width) || length <= 0 || width <= 0) {
+            areaResult.style.display = 'none';
+            areaResult.innerHTML = ''; // Clear previous
+            return;
+          }
+
+          const area = length * width;
+          areaResult.innerHTML = `Área Total: <span class="text-blue-600">${numFormatter.format(
+            area
+          )} m²</span>`;
+          areaResult.style.display = 'block';
+        }
+
+        areaLength.addEventListener('input', updateArea);
+        areaWidth.addEventListener('input', updateArea);
+
+        // --- Calculator: Commission (Restored) ---
+        const commPriceEl = document.getElementById('comm-price');
+        inputMasks.commPrice = IMask(commPriceEl, currencyMaskOptions); // Apply mask
+        const commPercent = document.getElementById('comm-percent');
+        const commBrokerPercent = document.getElementById(
+          'comm-broker-percent'
+        ); // NEW
+        const commResult = document.getElementById('comm-result');
+
+        function updateCommission() {
+          const price = parseFloat(inputMasks.commPrice.unmaskedValue); // Use unmaskedValue
+          const percent = parseFloat(commPercent.value);
+          const brokerPercent = parseFloat(commBrokerPercent.value); // NEW
+
+          if (isNaN(price) || isNaN(percent) || price <= 0 || percent <= 0) {
+            commResult.style.display = 'none';
+            commResult.innerHTML = ''; // Clear previous
+            return;
+          }
+
+          const commission = (price * percent) / 100;
+
+          // NEW Calculation
+          let brokerShare = 0;
+          let brokerPercentVal = 0;
+          if (!isNaN(brokerPercent) && brokerPercent > 0) {
+            brokerShare = commission * (brokerPercent / 100);
+            brokerPercentVal = brokerPercent;
+          }
+
+          // Updated innerHTML
+          commResult.innerHTML = `Comissão Total: <span class="text-blue-600">${brlFormatter.format(
+            commission
+          )}</span>
+                    <div class="comm-breakdown">
+                        <span class="comm-label">Corretor (${numFormatter.format(
+                          brokerPercentVal
+                        )}%):</span>
+                        <span class="comm-value">${brlFormatter.format(
+                          brokerShare
+                        )}</span>
+                    </div>
+                `;
+          commResult.style.display = 'block';
+        }
+
+        commPriceEl.addEventListener('input', updateCommission); // Listen on the element
+        commPercent.addEventListener('input', () => {
+          updateCommission();
+          localStorage.setItem('defaultCommPercent', commPercent.value); // Save to storage
+        });
+        commBrokerPercent.addEventListener('input', updateCommission); // NEW listener
+
+        // --- Calculator: Price Change (Restored) ---
+        const priceOldEl = document.getElementById('price-old');
+        inputMasks.priceOld = IMask(priceOldEl, currencyMaskOptions); // Apply mask
+        const priceNewEl = document.getElementById('price-new');
+        inputMasks.priceNew = IMask(priceNewEl, currencyMaskOptions); // Apply mask
+        const changeResult = document.getElementById('change-result');
+
+        function updatePriceChange() {
+          const oldVal = parseFloat(inputMasks.priceOld.unmaskedValue); // Use unmaskedValue
+          const newVal = parseFloat(inputMasks.priceNew.unmaskedValue); // Use unmaskedValue
+
+          if (isNaN(oldVal) || isNaN(newVal) || oldVal <= 0 || newVal <= 0) {
+            changeResult.style.display = 'none';
+            changeResult.innerHTML = ''; // Clear previous
+            return;
+          }
+
+          const change = ((newVal - oldVal) / oldVal) * 100;
+          const formattedChange = numFormatter.format(change);
+
+          if (change > 0) {
+            changeResult.innerHTML = `Variação: <span class="text-green-600">+${formattedChange}%</span>`;
+          } else if (change < 0) {
+            changeResult.innerHTML = `Variação: <span class="text-red-600">${formattedChange}%</span>`;
+          } else {
+            changeResult.innerHTML = `Variação: <span class="text-gray-600">0.00%</span>`;
+          }
+          changeResult.style.display = 'block';
+        }
+
+        priceOldEl.addEventListener('input', updatePriceChange); // Listen on the element
+        priceNewEl.addEventListener('input', updatePriceChange); // Listen on the element
+
+        // --- Calculator: Financing (PRICE - Restored) ---
+        const finPriceEl = document.getElementById('fin-price');
+        inputMasks.finPrice = IMask(finPriceEl, currencyMaskOptions); // Apply mask
+        const finDownpaymentEl = document.getElementById('fin-downpayment');
+        inputMasks.finDownpayment = IMask(
+          finDownpaymentEl,
+          currencyMaskOptions
+        ); // Apply mask
+        const finRate = document.getElementById('fin-rate');
+        const finTerm = document.getElementById('fin-term');
+        const finResult = document.getElementById('fin-result');
+
+        function updateFinancing() {
+          const price = parseFloat(inputMasks.finPrice.unmaskedValue); // Use unmaskedValue
+          const down = parseFloat(inputMasks.finDownpayment.unmaskedValue); // Use unmaskedValue
+          const rate = parseFloat(finRate.value);
+          const term = parseFloat(finTerm.value);
+
+          if (
+            isNaN(price) ||
+            isNaN(down) ||
+            isNaN(rate) ||
+            isNaN(term) ||
+            price <= 0 ||
+            down < 0 ||
+            rate <= 0 ||
+            term <= 0
+          ) {
+            finResult.style.display = 'none';
+            finResult.innerHTML = '';
+            return;
+          }
+
+          const loanAmount = price - down;
+          if (loanAmount <= 0) {
+            finResult.style.display = 'none';
+            finResult.innerHTML = '';
+            return;
+          }
+
+          const monthlyRate = rate / 12 / 100;
+          const numPayments = term * 12;
+
+          let monthlyPayment;
+          if (monthlyRate === 0) {
+            monthlyPayment = loanAmount / numPayments;
+          } else {
+            const numerator =
+              monthlyRate * Math.pow(1 + monthlyRate, numPayments);
+            const denominator = Math.pow(1 + monthlyRate, numPayments) - 1;
+            monthlyPayment = loanAmount * (numerator / denominator);
+          }
+
+          finResult.innerHTML = `Parcela Mensal: <span class="text-blue-600">${brlFormatter.format(
+            monthlyPayment
+          )}</span>`;
+          finResult.style.display = 'block';
+        }
+
+        finPriceEl.addEventListener('input', updateFinancing); // Listen on the element
+        finDownpaymentEl.addEventListener('input', updateFinancing); // Listen on the element
+        finRate.addEventListener('input', () => {
+          updateFinancing();
+          localStorage.setItem('defaultFinRate', finRate.value); // Save to storage
+          document.getElementById('sac-rate').value = finRate.value; // Sync with SAC
+          updateFinancingSAC();
+        });
+        finTerm.addEventListener('input', updateFinancing);
+
+        // --- Calculator: ITBI (Restored) ---
+        const itbiPriceEl = document.getElementById('itbi-price');
+        inputMasks.itbiPrice = IMask(itbiPriceEl, currencyMaskOptions); // Apply mask
+        const itbiRate = document.getElementById('itbi-rate');
+        const itbiResult = document.getElementById('itbi-result');
+
+        function updateITBI() {
+          const price = parseFloat(inputMasks.itbiPrice.unmaskedValue); // Use unmaskedValue
+          const rate = parseFloat(itbiRate.value);
+
+          if (isNaN(price) || isNaN(rate) || price <= 0 || rate <= 0) {
+            itbiResult.style.display = 'none';
+            itbiResult.innerHTML = '';
+            return;
+          }
+
+          const tax = (price * rate) / 100;
+          itbiResult.innerHTML = `Valor do ITBI: <span class="text-blue-600">${brlFormatter.format(
+            tax
+          )}</span>`;
+          itbiResult.style.display = 'block';
+        }
+
+        itbiPriceEl.addEventListener('input', updateITBI); // Listen on the element
+        itbiRate.addEventListener('input', () => {
+          updateITBI();
+          localStorage.setItem('defaultItbiRate', itbiRate.value); // Save to storage
+          document.getElementById('cta-itbi-rate').value = itbiRate.value; // Sync with CTA
+          updateCTA();
+        });
+
+        // --- Calculator: Price per m² (Restored) ---
+        const ppmPriceEl = document.getElementById('ppm-price');
+        inputMasks.ppmPrice = IMask(ppmPriceEl, currencyMaskOptions); // Apply mask
+        const ppmArea = document.getElementById('ppm-area');
+        const ppmResult = document.getElementById('ppm-result');
+
+        function updatePricePerM2() {
+          const price = parseFloat(inputMasks.ppmPrice.unmaskedValue); // Use unmaskedValue
+          const area = parseFloat(ppmArea.value);
+
+          if (isNaN(price) || isNaN(area) || price <= 0 || area <= 0) {
+            ppmResult.style.display = 'none';
+            ppmResult.innerHTML = '';
+            return;
+          }
+
+          const pricePerM2 = price / area;
+          ppmResult.innerHTML = `Preço/m²: <span class="text-blue-600">${brlFormatter.format(
+            pricePerM2
+          )}</span>`;
+          ppmResult.style.display = 'block';
+        }
+
+        ppmPriceEl.addEventListener('input', updatePricePerM2); // Listen on the element
+        ppmArea.addEventListener('input', updatePricePerM2);
+
+        // --- Calculator: Rental Yield (Restored) ---
+        const yieldPriceEl = document.getElementById('yield-price');
+        inputMasks.yieldPrice = IMask(yieldPriceEl, currencyMaskOptions); // Apply mask
+        const yieldRentEl = document.getElementById('yield-rent');
+        inputMasks.yieldRent = IMask(yieldRentEl, currencyMaskOptions); // Apply mask
+        const yieldResult = document.getElementById('yield-result');
+
+        function updateYield() {
+          const price = parseFloat(inputMasks.yieldPrice.unmaskedValue); // Use unmaskedValue
+          const rent = parseFloat(inputMasks.yieldRent.unmaskedValue); // Use unmaskedValue
+
+          if (isNaN(price) || isNaN(rent) || price <= 0 || rent <= 0) {
+            yieldResult.style.display = 'none';
+            yieldResult.innerHTML = '';
+            return;
+          }
+
+          const annualYield = ((rent * 12) / price) * 100;
+          yieldResult.innerHTML = `Rentabilidade Anual: <span class="text-green-600">${numFormatter.format(
+            annualYield
+          )}%</span>`;
+          yieldResult.style.display = 'block';
+        }
+
+        yieldPriceEl.addEventListener('input', updateYield); // Listen on the element
+        yieldRentEl.addEventListener('input', updateYield); // Listen on the element
+
+        // --- Calculator: Custo Total de Aquisição (NEW) ---
+        const ctaPriceEl = document.getElementById('cta-price');
+        inputMasks.ctaPrice = IMask(ctaPriceEl, currencyMaskOptions);
+        const ctaItbiRateEl = document.getElementById('cta-itbi-rate');
+        const ctaCartorioRateEl = document.getElementById('cta-cartorio-rate');
+        const ctaOutrasEl = document.getElementById('cta-outras');
+        inputMasks.ctaOutras = IMask(ctaOutrasEl, currencyMaskOptions);
+        const ctaResultEl = document.getElementById('cta-result');
+
+        function updateCTA() {
+          const price = parseFloat(inputMasks.ctaPrice.unmaskedValue);
+          const itbiRate = parseFloat(ctaItbiRateEl.value);
+          const cartorioRate = parseFloat(ctaCartorioRateEl.value);
+          const outras = parseFloat(inputMasks.ctaOutras.unmaskedValue);
+
+          if (isNaN(price) || price <= 0) {
+            ctaResultEl.style.display = 'none';
+            ctaResultEl.innerHTML = '';
+            return;
+          }
+
+          const itbiVal =
+            isNaN(itbiRate) || itbiRate <= 0 ? 0 : (price * itbiRate) / 100;
+          const cartorioVal =
+            isNaN(cartorioRate) || cartorioRate <= 0
+              ? 0
+              : (price * cartorioRate) / 100;
+          const outrasVal = isNaN(outras) || outras < 0 ? 0 : outras;
+
+          const total = price + itbiVal + cartorioVal + outrasVal;
+
+          ctaResultEl.innerHTML = `Custo Total: <span class="text-blue-700">${brlFormatter.format(
+            total
+          )}</span>
+                    <div class="cta-breakdown">
+                        <span class="cta-label">Imóvel:</span> <span class="cta-value">${brlFormatter.format(
+                          price
+                        )}</span>
+                        <span class="cta-label">ITBI (${numFormatter.format(
+                          itbiRate || 0
+                        )}%):</span> <span class="cta-value">${brlFormatter.format(
+            itbiVal
+          )}</span>
+                        <span class="cta-label">Cartório (${numFormatter.format(
+                          cartorioRate || 0
+                        )}%):</span> <span class="cta-value">${brlFormatter.format(
+            cartorioVal
+          )}</span>
+                        <span class="cta-label">Outras Desp.:</span> <span class="cta-value">${brlFormatter.format(
+                          outrasVal
+                        )}</span>
+                    </div>
+                `;
+          ctaResultEl.style.display = 'block';
+        }
+
+        ctaPriceEl.addEventListener('input', updateCTA);
+        ctaItbiRateEl.addEventListener('input', () => {
+          updateCTA();
+          localStorage.setItem('defaultItbiRate', ctaItbiRateEl.value); // Save to storage
+          document.getElementById('itbi-rate').value = ctaItbiRateEl.value; // Sync with ITBI
+          updateITBI();
+        });
+        ctaCartorioRateEl.addEventListener('input', () => {
+          updateCTA();
+          localStorage.setItem('defaultCartorioRate', ctaCartorioRateEl.value); // Save to storage
+        });
+        ctaOutrasEl.addEventListener('input', updateCTA);
+
+        // --- Calculator: Financing (SAC) (NEW) ---
+        const sacPriceEl = document.getElementById('sac-price');
+        inputMasks.sacPrice = IMask(sacPriceEl, currencyMaskOptions);
+        const sacDownpaymentEl = document.getElementById('sac-downpayment');
+        inputMasks.sacDownpayment = IMask(
+          sacDownpaymentEl,
+          currencyMaskOptions
+        );
+        const sacRate = document.getElementById('sac-rate');
+        const sacTerm = document.getElementById('sac-term');
+        const sacResult = document.getElementById('sac-result');
+
+        function updateFinancingSAC() {
+          const price = parseFloat(inputMasks.sacPrice.unmaskedValue);
+          const down = parseFloat(inputMasks.sacDownpayment.unmaskedValue);
+          const rate = parseFloat(sacRate.value);
+          const term = parseFloat(sacTerm.value);
+
+          if (
+            isNaN(price) ||
+            isNaN(down) ||
+            isNaN(rate) ||
+            isNaN(term) ||
+            price <= 0 ||
+            down < 0 ||
+            rate <= 0 ||
+            term <= 0
+          ) {
+            sacResult.style.display = 'none';
+            sacResult.innerHTML = '';
+            return;
+          }
+
+          const loanAmount = price - down;
+          if (loanAmount <= 0) {
+            sacResult.style.display = 'none';
+            sacResult.innerHTML = '';
+            return;
+          }
+
+          const monthlyRate = rate / 12 / 100;
+          const numPayments = term * 12;
+
+          const amortization = loanAmount / numPayments;
+
+          // 1ª Parcela
+          const firstInterest = loanAmount * monthlyRate;
+          const firstPayment = amortization + firstInterest;
+
+          // Última Parcela
+          const lastBalance = loanAmount - amortization * (numPayments - 1);
+          const lastInterest = lastBalance * monthlyRate;
+          const lastPayment = amortization + lastInterest;
+
+          sacResult.innerHTML = `1ª Parcela: <span class="text-red-600">${brlFormatter.format(
+            firstPayment
+          )}</span>
+                    <div class="sac-breakdown">
+                        Última Parcela: <span class="text-green-600">${brlFormatter.format(
+                          lastPayment
+                        )}</span>
+                    </div>
+                `;
+          sacResult.style.display = 'block';
+        }
+
+        sacPriceEl.addEventListener('input', updateFinancingSAC);
+        sacDownpaymentEl.addEventListener('input', updateFinancingSAC);
+        sacRate.addEventListener('input', () => {
+          updateFinancingSAC();
+          localStorage.setItem('defaultFinRate', sacRate.value); // Save to storage
+          document.getElementById('fin-rate').value = sacRate.value; // Sync with PRICE
+          updateFinancing();
+        });
+        sacTerm.addEventListener('input', updateFinancingSAC);
+
+        // --- NEW: Calculator UI Selector ---
+        const calcSelector = document.getElementById('calculator-select');
+        const calcCards = document.querySelectorAll(
+          '#calculator-display-area [data-calculator]'
+        );
+
+        calcSelector.addEventListener('change', () => {
+          const targetId = calcSelector.value;
+
+          calcCards.forEach((card) => {
+            if (card.dataset.calculator === targetId) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
